@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/addphoto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    android:orientation="vertical"
+    android:gravity="center"
+    tools:context=".AddphotoActivity">
+
+    <!-- กรอบแสดงรูปภาพ -->
+    <RelativeLayout
+        android:id="@+id/clickupload"
+        android:layout_width="270dp"
+        android:layout_height="270dp"
+        android:background="@drawable/image_border"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/imageViewshow"
+            android:layout_width="270dp"
+            android:layout_height="270dp"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
+            android:visibility="gone"/>
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/rename"
+            android:scaleType="centerInside" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/imageView"
+            android:layout_centerHorizontal="true"
+            android:text="กรุณาอัพโหลดรูปภาพ"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"/>
+    </RelativeLayout>
+
+    <!-- แสดงข้อความ "นี่คือรูปภาพของคุณ" เมื่อเลือกรูป -->
+    <TextView
+        android:id="@+id/selectedImageText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="นี่คือรูปภาพของคุณ"
+        android:textSize="16sp"
+        android:textColor="#000000"
+        android:visibility="gone"
+        android:textStyle="bold"/>
+
+    <!-- ปุ่มยืนยันและล้างรูปอยู่ในบรรทัดเดียวกัน -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginTop="20dp">
+
+        <!-- ปุ่มยืนยัน -->
+        <Button
+            android:id="@+id/confirmButton"
+            android:layout_width="120dp"
+            android:layout_height="45dp"
+            android:text="✔ ยืนยัน"
+            android:textSize="16dp"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/green"
+            android:visibility="gone"
+            android:textStyle="bold"
+            android:layout_marginEnd="10dp"/>
+
+        <!-- ปุ่มล้างรูป -->
+        <Button
+            android:id="@+id/clearButton"
+            android:layout_width="120dp"
+            android:layout_height="45dp"
+            android:text="🗑 ล้างรูป"
+            android:textSize="16dp"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/orange"
+            android:visibility="gone"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+    <!-- ปุ่มออกจากระบบ -->
+    <Button
+        android:id="@+id/buttonLogout"
+        android:layout_width="200dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="10dp"
+        android:text="ออกจากระบบ"
+        android:textSize="16dp"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/red"
+        android:textStyle="bold"/>
+</LinearLayout>

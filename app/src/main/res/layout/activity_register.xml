@@ -1,0 +1,77 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/register"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    tools:context=".RegisterActivity">
+
+    <!-- Logo -->
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/whoicon"
+        android:layout_marginTop="60dp"
+        android:layout_gravity="center"
+        android:contentDescription="WhoAreYou logo"
+        android:elevation="8dp"
+        android:layout_marginBottom="20dp"/>
+
+    <!-- Email Input -->
+    <EditText
+        android:id="@+id/emailInput"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:hint="ชื่อผู้ใช้"
+        android:padding="10dp"
+        android:textSize="16sp"
+        android:inputType="textEmailAddress"
+        android:layout_marginBottom="10dp"/>
+
+    <!-- Password Input -->
+    <EditText
+        android:id="@+id/passwordInput"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:hint="รหัสผ่าน"
+        android:padding="10dp"
+        android:textSize="16sp"
+        android:inputType="textPassword"
+        android:layout_marginBottom="10dp"/>
+
+    <!-- Confirm Password -->
+    <EditText
+        android:id="@+id/confirmPasswordInput"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:hint="ยืนยันรหัสผ่าน"
+        android:padding="10dp"
+        android:textSize="16sp"
+        android:inputType="textPassword"
+        android:layout_marginBottom="20dp"/>
+
+    <!-- Register Button -->
+    <Button
+        android:id="@+id/registerButton"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:text="สมัครสมาชิก"
+        android:textSize="18sp"
+        android:textColor="@color/white"
+        android:layout_marginBottom="10dp"/>
+
+    <!-- Back to Login -->
+    <TextView
+        android:id="@+id/backToLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="มีบัญชีอยู่แล้ว? เข้าสู่ระบบ"
+        android:textSize="14sp"
+        android:textColor="@color/red"
+        android:gravity="center"
+        android:layout_marginTop="10dp"/>
+</LinearLayout>
