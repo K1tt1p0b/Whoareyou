@@ -11,6 +11,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.project101.PrizeActivity
 
 class yourfaceActivity : AppCompatActivity() {
     @SuppressLint("MissingInflatedId")
@@ -30,6 +31,7 @@ class yourfaceActivity : AppCompatActivity() {
         val imageView = findViewById<ImageView>(R.id.imageView)
         val backButton = findViewById<Button>(R.id.buttonback)
         val buttonStar = findViewById<Button>(R.id.buttonstar)
+        val buttonSkin = findViewById<Button>(R.id.buttonskin)
 
         // ✅ ปุ่ม Back → กลับไปหน้าก่อนหน้านี้
         backButton.setOnClickListener {
@@ -44,6 +46,16 @@ class yourfaceActivity : AppCompatActivity() {
                 intent.putExtra("imageUri", imageUriString)
                 startActivity(intent)
             } else {
+                Toast.makeText(this, "Image URI is missing", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        buttonSkin.setOnClickListener{
+            if(imageUriString != null){
+                val intent = Intent(this, PrizeActivity::class.java)
+                intent.putExtra("imageUri", imageUriString)
+                startActivity(intent)
+            }else{
                 Toast.makeText(this, "Image URI is missing", Toast.LENGTH_SHORT).show()
             }
         }

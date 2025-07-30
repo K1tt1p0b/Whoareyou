@@ -56,4 +56,16 @@
         android:backgroundTint="@color/purple2"
         android:text="คุณหน้าเหมือนดาราคนไหน?" />
 
+    <android.widget.Button
+        android:id="@+id/buttonskin"
+        android:layout_width="288dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:textStyle="bold"
+        android:textSize="18dp"
+        android:textColor="@color/purple"
+        android:backgroundTint="@color/purple2"
+        android:text="คุณผิวสีอะไร?" />
+
 </LinearLayout>
