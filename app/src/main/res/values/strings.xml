@@ -11,4 +11,21 @@
 และจะไม่ถูกเปิดเผยต่อบุคคลที่สาม
 โดยไม่ได้รับความยินยอมจากคุณ</string>
 
+    <string-array name="budget_options">
+        <item>0 - 100 บาท</item>
+        <item>100 - 500 บาท</item>
+        <item>501 - 1000 บาท</item>
+        <item>1001 - 2000 บาท</item>
+        <item>มากกว่า 2000 บาท</item>
+    </string-array>
+
+    <string-array name="style_options">
+        <item>เกาหลี</item>
+        <item>ฝรั่ง</item>
+        <item>ญี่ปุ่น</item>
+        <item>ธรมมชาติ</item>
+    </string-array>
+
+    <string name="back_button_description">ย้อนกลับ</string>
+
 </resources>

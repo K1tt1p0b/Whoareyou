@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FCE4EC" tools:context=".homeActivity">
+
+    <View
+        android:id="@+id/header_background"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
+        android:background="#F8BBD0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/logoImageView"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/logo" android:background="@drawable/rounded_pink_background" android:padding="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"/>
+
+    <Button
+        android:id="@+id/loginButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="เข้าสู่ระบบ"
+        android:textColor="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:strokeColor="@color/black"
+        app:strokeWidth="1.5dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"/>
+
+    <TextView
+        android:id="@+id/toneTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="โทนสีผิวของคุณคือ"
+        android:textSize="24sp"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/skinColorTextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="150dp" />
+
+    <TextView
+        android:id="@+id/skinColorTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ผิวเหลือง"
+        android:textSize="30sp"
+        android:textColor="#FF4081" android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/toneTextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:id="@+id/budgetLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="เลือกงบประมาณ"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/skinColorTextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="60dp"/>
+
+    <Spinner
+        android:id="@+id/budgetSpinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:entries="@array/budget_options" android:padding="20dp"
+        android:background="@drawable/rounded_spinner_background"
+        app:layout_constraintWidth_percent="0.7"
+        app:layout_constraintTop_toBottomOf="@id/budgetLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"
+        android:spinnerMode="dropdown"/>
+
+    <TextView
+        android:id="@+id/styleLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="เลือกสไตล์การแต่งหน้า"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/budgetSpinner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="40dp"/>
+
+    <Spinner
+        android:id="@+id/styleSpinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:entries="@array/style_options" android:padding="20dp"
+        android:background="@drawable/rounded_spinner_background"
+        app:layout_constraintWidth_percent="0.7"
+        app:layout_constraintTop_toBottomOf="@id/styleLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"
+        android:spinnerMode="dropdown"/>
+
+    <Button
+        android:id="@+id/nextButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="ถัดไป"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        app:layout_constraintWidth_percent="0.6"
+        app:layout_constraintBottom_toTopOf="@+id/backButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:strokeColor="@color/black"
+        app:strokeWidth="1.5dp"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/backButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="ย้อนกลับ"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        app:layout_constraintWidth_percent="0.6"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:strokeColor="@color/black"
+        app:strokeWidth="1.5dp"
+        android:layout_marginBottom="32dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
