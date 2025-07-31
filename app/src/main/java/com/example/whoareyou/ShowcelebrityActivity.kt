@@ -64,6 +64,8 @@ class ShowcelebrityActivity : AppCompatActivity() {
         } else {
             Toast.makeText(this, "Image URI is invalid", Toast.LENGTH_SHORT).show()
         }
+
+
     }
 
     // ✅ ฟังก์ชันอัปโหลดรูปไปยังเซิร์ฟเวอร์
