@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FCE4EC"
+    android:padding="16dp">
+
+    <ImageButton
+        android:id="@+id/btn_back_feedback"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="?attr/homeAsUpIndicator"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="ย้อนกลับ"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="0dp" /> <TextView
+    android:id="@+id/tv_feedback_title"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:text="คุณพึงพอใจกับประสบการณ์ของคุณมากแค่ไหน?"
+    android:textColor="#333333"
+    android:textSize="24sp"
+    android:textStyle="bold"
+    android:gravity="center"
+    app:layout_constraintTop_toBottomOf="@id/btn_back_feedback" app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:layout_marginTop="24dp" /> <RatingBar
+    android:id="@+id/rating_bar"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:numStars="5"
+    android:stepSize="1"
+    android:rating="0"
+    app:layout_constraintTop_toBottomOf="@id/tv_feedback_title"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:layout_marginTop="32dp" />
+
+    <TextView
+        android:id="@+id/tv_rating_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="กรุณาเลือกจำนวนดาว"
+        android:textColor="#666666"
+        android:textSize="14sp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/rating_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_feedback"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="เราอยากฟังความคิดเห็นของคุณ..."
+        app:counterEnabled="true"
+        app:counterMaxLength="300"
+        app:boxBackgroundMode="outline"
+        app:boxCornerRadiusTopStart="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
+        app:boxCornerRadiusBottomStart="8dp"
+        app:boxCornerRadiusBottomEnd="8dp"
+        app:boxStrokeColor="@color/black"
+        app:hintTextColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/tv_rating_description"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="32dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_feedback"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="120dp"
+            android:gravity="top|start"
+            android:inputType="textMultiLine"
+            android:maxLength="300"
+            android:scrollbars="vertical"
+            android:textColor="#333333" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/btn_submit_feedback"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="ส่งความคิดเห็น"
+        android:textColor="@android:color/black"
+        app:backgroundTint="#FFFBEA"
+        android:paddingVertical="12dp"
+        android:textSize="18sp"
+        app:cornerRadius="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="32dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

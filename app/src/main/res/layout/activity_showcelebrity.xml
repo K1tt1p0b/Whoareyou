@@ -1,23 +1,24 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/celebrityyou"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
+    android:fillViewport="true"> <LinearLayout
+    android:id="@+id/celebrityyou"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" android:background="@drawable/background"
     android:orientation="vertical"
     tools:context=".ShowcelebrityActivity">
 
-    <!-- 🔹 ปุ่มย้อนกลับ (Arrow) -->
     <android.widget.Button
         android:id="@+id/button_back"
         android:layout_width="35dp"
         android:layout_height="35dp"
-        android:background="@drawable/arrow"
         android:layout_marginTop="40dp"
-        android:layout_marginLeft="20dp"
-        android:onClick="onBackPressed" /> <!-- กำหนดให้กดแล้วกลับไปหน้าก่อนหน้า -->
-
+        android:layout_marginLeft="40dp"
+        android:background="@drawable/arrow"
+        android:onClick="onBackPressed"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -29,34 +30,13 @@
             android:id="@+id/you_look_like"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="คุณหน้าคล้ายกับ ..."
+            android:text="ผลลัพธ์การทำนาย"
             android:textStyle="bold"
             android:textSize="20sp"
             android:textColor="#000000" />
 
-        <TextView
-            android:id="@+id/celebrity_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:fontFamily="sans-serif-medium"
-            android:text=""
-            android:textColor="#000000"
-            android:textSize="30sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/similarity_percentage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" %"
-            android:textStyle="bold"
-            android:textSize="40sp"
-            android:textColor="#FF245B"
-            android:layout_marginTop="10dp" />
     </LinearLayout>
 
-    <!-- 🔹 กรอบแสดงรูปดาราที่คล้าย -->
     <RelativeLayout
         android:id="@+id/celebrity"
         android:layout_width="250dp"
@@ -74,23 +54,53 @@
             android:adjustViewBounds="true"/>
     </RelativeLayout>
 
-    <!-- 🔹 ปุ่มอัปโหลดใหม่ (อยู่ตรงกลาง) -->
-    <RelativeLayout
+    <LinearLayout
+        android:id="@+id/results_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:gravity="center">
+        android:orientation="vertical"
+        android:layout_marginTop="16dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+    </LinearLayout>
 
-        <android.widget.Button
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="30dp"
+        android:gravity="center"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp">
+
+        <Button
             android:id="@+id/allow_button"
-            android:layout_width="150dp"
+            android:layout_width="0dp"
             android:layout_height="45dp"
-            android:layout_centerHorizontal="true"
+            android:layout_weight="1"
             android:background="@drawable/rounded_button"
             android:backgroundTint="@color/pink1"
             android:text="อัพโหลดรูปใหม่"
             android:textStyle="bold"
-            android:textSize="13dp" />
-    </RelativeLayout>
+            android:textSize="14sp"
+            android:layout_marginEnd="10dp" />
+
+        <Button
+            android:id="@+id/share_button"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_weight="1"
+            android:background="@drawable/rounded_button"
+            android:backgroundTint="@color/teal_200"
+            android:text="แชร์"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginStart="10dp" />
+
+    </LinearLayout>
 
 </LinearLayout>
+
+</ScrollView>

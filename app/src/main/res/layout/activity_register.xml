@@ -4,7 +4,7 @@
     android:id="@+id/register"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
+    android:background="#FCE4EC"
     android:orientation="vertical"
     android:gravity="center_horizontal"
     tools:context=".RegisterActivity">

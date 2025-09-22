@@ -1,4 +1,4 @@
-package com.example.project101
+package com.kittipob.whoareyou
 
 // Product.kt
 data class Product(

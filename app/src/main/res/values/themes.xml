@@ -19,4 +19,8 @@
         <item name="android:background">@drawable/rounded_button</item>
         <item name="android:backgroundTint">@null</item> <!-- ปิด backgroundTint -->
     </style>
+    <style name="RatingBarTheme" parent="Widget.AppCompat.RatingBar.Indicator">
+        <item name="android:progressTint">@color/pink1</item>
+        <item name="android:secondaryProgressTint">@android:color/darker_gray</item>
+    </style>
 </resources>

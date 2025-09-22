@@ -1,4 +1,4 @@
-package com.example.project101
+package com.kittipob.whoareyou
 
 // ProductAdapter.kt
 import android.view.LayoutInflater
@@ -8,7 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import coil.load // import สำหรับ Coil
-import com.kittipob.whoareyou.R
+
 
 class ProductAdapter(
     private var products: List<Product>,

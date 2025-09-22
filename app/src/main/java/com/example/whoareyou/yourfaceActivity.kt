@@ -11,7 +11,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.project101.PrizeActivity
 
 class yourfaceActivity : AppCompatActivity() {
     @SuppressLint("MissingInflatedId")
@@ -32,6 +31,9 @@ class yourfaceActivity : AppCompatActivity() {
         val backButton = findViewById<Button>(R.id.buttonback)
         val buttonStar = findViewById<Button>(R.id.buttonstar)
         val buttonSkin = findViewById<Button>(R.id.buttonskin)
+        // ✅ เพิ่มการอ้างอิงถึงปุ่ม Feedback
+        val buttonFeedback = findViewById<Button>(R.id.buttonfeedback) // อย่าลืมใส่ ID ของปุ่มนี้ใน XML ของ activity_yourface ด้วย!
+
 
         // ✅ ปุ่ม Back → กลับไปหน้าก่อนหน้านี้
         backButton.setOnClickListener {
@@ -58,6 +60,12 @@ class yourfaceActivity : AppCompatActivity() {
             }else{
                 Toast.makeText(this, "Image URI is missing", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        // ✅ ตั้งค่า Listener สำหรับปุ่ม Feedback เพื่อเปิด FeedBackActivity
+        buttonFeedback.setOnClickListener {
+            val intent = Intent(this, FeedBackActivity::class.java)
+            startActivity(intent)
         }
     }
 }

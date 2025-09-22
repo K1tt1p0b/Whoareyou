@@ -21,6 +21,8 @@ android {
         }
     }
 
+    // *** จุดที่ควรแก้ไข: คุณมี buildTypes block ซ้ำกัน ***
+    // บล็อกนี้ควรถูกรวมเข้ากับบล็อก buildTypes ด้านล่าง
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
@@ -50,6 +52,7 @@ android {
         viewBinding = true
     }
 
+    // *** บล็อก buildTypes ที่สอง: ควรนำโค้ดจากบล็อกด้านบนมารวมที่นี่ ***
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -57,6 +60,14 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // ✅ เพิ่ม signingConfig ตรงนี้
+            signingConfig = signingConfigs.getByName("release")
+        }
+        // คุณอาจต้องการกำหนดค่า debug build type ด้วยเช่นกัน
+        debug {
+            // ตัวอย่าง:
+            // isMinifyEnabled = false
+            // signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -79,10 +90,17 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    implementation ("com.squareup.okhttp3:okhttp:4.9.1")
-    implementation ("com.squareup.okhttp3:logging-interceptor:4.9.1")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // *** จุดที่ควรแก้ไข: คุณมี OkHttp ซ้ำซ้อนกันและเวอร์ชันต่างกัน ***
+    implementation ("com.squareup.okhttp3:okhttp:4.9.1") // เวอร์ชันเก่า
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.9.1") // เวอร์ชันเก่า
+    implementation("com.squareup.okhttp3:okhttp:4.12.0") // เวอร์ชันใหม่กว่า
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
+    
+    // *** Coil Dependency: เวอร์ชัน 2.6.0 โอเค แต่มี 2.7.0 ที่ใหม่กว่า (ณ ตอนนี้) ***
+    implementation("io.coil-kt:coil:2.6.0") // สามารถอัปเดตเป็น 2.7.0 ได้ถ้าต้องการ
+
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("io.coil-kt:coil:2.6.0")
 }

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -8,7 +9,6 @@
     android:orientation="vertical"
     tools:context=".yourfaceActivity">
 
-    <!-- ปุ่ม Back -->
     <android.widget.Button
         android:id="@+id/buttonback"
         android:layout_width="35dp"
@@ -43,7 +43,6 @@
             android:adjustViewBounds="true"/>
     </RelativeLayout>
 
-    <!-- ปุ่มตรวจสอบหน้าคล้ายดารา -->
     <android.widget.Button
         android:id="@+id/buttonstar"
         android:layout_width="288dp"
@@ -52,9 +51,13 @@
         android:layout_marginTop="20dp"
         android:textStyle="bold"
         android:textSize="18dp"
-        android:textColor="@color/purple"
-        android:backgroundTint="@color/purple2"
-        android:text="คุณหน้าเหมือนดาราคนไหน?" />
+        android:textColor="@color/white"
+        android:backgroundTint="@color/pink3"
+        android:text="คุณหน้าเหมือนดาราคนไหน?"
+        android:shadowColor="#FF000000"
+        android:shadowDx="1.5"
+        android:shadowDy="1.5"
+        android:shadowRadius="2" />
 
     <android.widget.Button
         android:id="@+id/buttonskin"
@@ -64,8 +67,28 @@
         android:layout_marginTop="20dp"
         android:textStyle="bold"
         android:textSize="18dp"
-        android:textColor="@color/purple"
-        android:backgroundTint="@color/purple2"
-        android:text="คุณผิวสีอะไร?" />
+        android:textColor="@color/white"
+        android:backgroundTint="@color/pink3"
+        android:text="คุณผิวสีอะไร?"
+        android:shadowColor="#FF000000"
+        android:shadowDx="1.5"
+        android:shadowDy="1.5"
+        android:shadowRadius="2" />
+
+    <android.widget.Button
+        android:id="@+id/buttonfeedback"
+        android:layout_width="288dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:textStyle="bold"
+        android:textSize="18dp"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/pink3"
+        android:text="⭐️ ให้คะแนนแอป"
+        android:shadowColor="#FF000000"
+        android:shadowDx="1.5"
+        android:shadowDy="1.5"
+        android:shadowRadius="2" />
 
 </LinearLayout>
