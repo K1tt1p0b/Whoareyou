@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">WhoAreYou?</string>
-    <string name="root_url">http://10.13.3.143:5003</string>
+    <string name="root_url">http://192.168.1.100:5003</string>
 
 
     <string name="policy">ทางเราขอความยินยอมจากคุณ
@@ -17,13 +17,6 @@
         <item>501 - 1000 บาท</item>
         <item>1001 - 2000 บาท</item>
         <item>มากกว่า 2000 บาท</item>
-    </string-array>
-
-    <string-array name="style_options">
-        <item>เกาหลี</item>
-        <item>ฝรั่ง</item>
-        <item>ญี่ปุ่น</item>
-        <item>ธรมมชาติ</item>
     </string-array>
 
     <string name="back_button_description">ย้อนกลับ</string>

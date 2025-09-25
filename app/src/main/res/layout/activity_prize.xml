@@ -55,6 +55,23 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="32dp"/>
 
+        <!-- ✅ ปุ่มดูตารางสี (ไม่บังคับ) -->
+        <Button
+            android:id="@+id/previewPaletteButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="ดูตารางสี (ไม่บังคับ)"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            app:layout_constraintWidth_percent="0.6"
+            app:layout_constraintTop_toBottomOf="@id/recommendedColorsLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:strokeColor="@color/black"
+            app:strokeWidth="1.5dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="8dp" />
+
         <ImageView
             android:id="@+id/recommendedColorImageView"
             android:layout_width="match_parent"
@@ -62,64 +79,14 @@
             android:src="@drawable/logo"
             android:scaleType="fitCenter"
             android:adjustViewBounds="true"
-            app:layout_constraintTop_toBottomOf="@id/recommendedColorsLabel"
+            app:layout_constraintTop_toBottomOf="@id/previewPaletteButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             android:layout_marginStart="32dp"
             android:layout_marginEnd="32dp"/>
 
-        <TextView
-            android:id="@+id/budgetLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="เลือกงบประมาณ"
-            android:textSize="18sp"
-            android:textColor="@color/black"
-            app:layout_constraintTop_toBottomOf="@id/recommendedColorImageView"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="48dp"/>
 
-        <Spinner
-            android:id="@+id/budgetSpinner"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:entries="@array/budget_options"
-            android:padding="20dp"
-            android:background="@drawable/rounded_spinner_background"
-            app:layout_constraintWidth_percent="0.75"
-            app:layout_constraintTop_toBottomOf="@id/budgetLabel"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp"
-            android:spinnerMode="dropdown"/>
-
-        <TextView
-            android:id="@+id/styleLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="เลือกสไตล์การแต่งหน้า"
-            android:textSize="18sp"
-            android:textColor="@color/black"
-            app:layout_constraintTop_toBottomOf="@id/budgetSpinner"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="32dp"/>
-
-        <Spinner
-            android:id="@+id/styleSpinner"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:entries="@array/style_options"
-            android:padding="20dp"
-            android:background="@drawable/rounded_spinner_background"
-            app:layout_constraintWidth_percent="0.75"
-            app:layout_constraintTop_toBottomOf="@id/styleLabel"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp"
-            android:spinnerMode="dropdown"/>
 
         <Button
             android:id="@+id/nextButton"
@@ -129,11 +96,13 @@
             android:textSize="18sp"
             android:textColor="@color/black"
             app:layout_constraintWidth_percent="0.6"
-            app:layout_constraintTop_toBottomOf="@id/styleSpinner" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/recommendedColorImageView"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:strokeColor="@color/black"
             app:strokeWidth="1.5dp"
             android:layout_marginTop="48dp" />
+
         <Button
             android:id="@+id/backButton"
             android:layout_width="0dp"
@@ -142,9 +111,12 @@
             android:textSize="18sp"
             android:textColor="@color/black"
             app:layout_constraintWidth_percent="0.6"
-            app:layout_constraintTop_toBottomOf="@+id/nextButton" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/nextButton"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:strokeColor="@color/black"
             app:strokeWidth="1.5dp"
-            android:layout_marginTop="16dp" android:layout_marginBottom="32dp"/> </androidx.constraintlayout.widget.ConstraintLayout>
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="32dp"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

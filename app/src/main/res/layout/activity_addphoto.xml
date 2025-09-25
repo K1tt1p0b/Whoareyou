@@ -10,6 +10,7 @@
     android:gravity="center"
     tools:context=".AddphotoActivity">
 
+
     <!-- กรอบแสดงรูปภาพ -->
     <RelativeLayout
         android:id="@+id/clickupload"
@@ -17,6 +18,8 @@
         android:layout_height="270dp"
         android:background="@drawable/image_border"
         android:gravity="center">
+
+
 
         <ImageView
             android:id="@+id/imageViewshow"
@@ -45,6 +48,16 @@
             android:textColor="@color/black"
             android:textStyle="bold"/>
     </RelativeLayout>
+
+    <TextView
+        android:id="@+id/NotiTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="*รูปหรือแสงที่ถ่ายมีผลต่อการวิเคราะห์*"
+        android:textSize="15dp"
+        android:textColor="#FF0000"
+        android:textStyle="bold"
+        android:layout_marginTop="8dp"/>
 
     <!-- แสดงข้อความ "นี่คือรูปภาพของคุณ" เมื่อเลือกรูป -->
     <TextView
