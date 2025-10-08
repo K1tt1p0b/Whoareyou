@@ -57,6 +57,7 @@
                 android:textStyle="bold"
                 android:textColor="#E53935"
                 android:textSize="12sp" />
+
             <TextView
                 android:id="@+id/tvConfidence"
                 android:layout_width="wrap_content"
@@ -64,7 +65,7 @@
                 android:text="ความมั่นใจ ~ 0% (—)"
                 android:textStyle="bold"
                 android:textColor="@android:color/darker_gray"
-                android:layout_marginTop="4dp"/>
+                android:layout_marginTop="6dp"/>
 
             <TextView
                 android:id="@+id/tvBadges"
@@ -74,6 +75,24 @@
                 android:textSize="12sp"
                 android:textColor="@android:color/darker_gray"
                 android:layout_marginTop="2dp"/>
+
+            <TextView
+                android:id="@+id/tvDelta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ΔE00: —"
+                android:textSize="12sp"
+                android:textColor="@android:color/darker_gray"
+                android:layout_marginTop="4dp"/>
+
+            <TextView
+                android:id="@+id/tvReasons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="12sp"
+                android:text="• เหตุผลที่เราแนะนำจะขึ้นตรงนี้"/>
 
         </LinearLayout>
 

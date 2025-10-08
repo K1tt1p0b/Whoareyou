@@ -35,11 +35,8 @@ class ProductDetailActivity : AppCompatActivity() {
     private lateinit var btnShopee: MaterialButton
     private lateinit var btnLazada: MaterialButton
 
-    private var shopeeUrl: String? = null
-    private var lazadaUrl: String? = null
     private var fallbackUrl: String? = null
 
-    // OkHttp + JWT
     private val authClient: OkHttpClient by lazy {
         val auth = Interceptor { chain ->
             val prefs = getSharedPreferences("UserSession", MODE_PRIVATE)
@@ -65,7 +62,6 @@ class ProductDetailActivity : AppCompatActivity() {
 
         BASE_URL = getString(R.string.root_url).trim().removeSuffix("/")
 
-        // Bind views
         topBar     = findViewById(R.id.topBar)
         progressBar= findViewById(R.id.progressBar)
         ivProduct  = findViewById(R.id.productImageView)
@@ -77,7 +73,6 @@ class ProductDetailActivity : AppCompatActivity() {
         btnShopee  = findViewById(R.id.shopeeButton)
         btnLazada  = findViewById(R.id.lazadaButton)
 
-        // Back
         topBar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
         val productId = intent.getIntExtra("PRODUCT_ID", -1)
@@ -85,12 +80,11 @@ class ProductDetailActivity : AppCompatActivity() {
 
         if (productId == -1) {
             Toast.makeText(this, "ไม่พบรหัสสินค้า", Toast.LENGTH_SHORT).show()
-            finish()
-            return
+            finish(); return
         }
 
-        btnShopee.setOnClickListener { openUrlSafe(shopeeUrl ?: lazadaUrl ?: fallbackUrl) }
-        btnLazada.setOnClickListener { openUrlSafe(lazadaUrl ?: shopeeUrl ?: fallbackUrl) }
+        btnShopee.setOnClickListener { openUrlSafe(fallbackUrl) }
+        btnLazada.setOnClickListener { openUrlSafe(fallbackUrl) }
 
         fetchDetail(productId)
     }
@@ -134,7 +128,6 @@ class ProductDetailActivity : AppCompatActivity() {
                     try {
                         val obj = JSONObject(bodyStr)
                         val item = obj.getJSONObject("item")
-                        val best = obj.optJSONObject("bestOffer")
 
                         val brand = item.optString("brandName")
                         val name  = item.optString("Name")
@@ -147,63 +140,42 @@ class ProductDetailActivity : AppCompatActivity() {
                             listOfNotNull(type.ifBlank { null }, shade.ifBlank { null }).joinToString(" • ")
                         )
 
-                        val bestPrice = best?.optDouble("PriceTHB") ?: Double.NaN
-                        val bestUrl   = best?.optString("URL", null)
-                        val retailer  = best?.optString("Retailer", "")?.lowercase(Locale.ROOT)
-                        val rating    = best?.optDouble("Rating", Double.NaN)
-                        val reviews   = best?.optInt("ReviewCount") ?: 0
-
                         // Title
-                        val title = if (brand.isNotBlank()) "$brand\n$name" else name
-                        tvTitle.text = title
+                        tvTitle.text = if (brand.isNotBlank()) "$brand\n$name" else name
 
                         // Meta
-                        val meta = buildString {
+                        tvMeta.text = buildString {
                             if (type.isNotBlank()) append("ประเภท: $type")
                             if (shade.isNotBlank()) {
                                 if (isNotEmpty()) append(" • ")
                                 append("เฉด: $shade")
                             }
-                        }
-                        tvMeta.text = meta.ifBlank { "-" }
+                        }.ifBlank { "-" }
 
                         // Price
-                        val showPrice = if (!bestPrice.isNaN()) bestPrice else price
-                        tvPrice.text = if (!showPrice.isNaN())
-                            NumberFormat.getNumberInstance(Locale("th","TH")).format(showPrice) + " บาท"
+                        tvPrice.text = if (!price.isNaN())
+                            NumberFormat.getNumberInstance(Locale("th","TH")).format(price) + " บาท"
                         else "-"
 
-                        // Desc
                         tvDesc.text = desc.ifBlank { "-" }
+                        tvRating.text = "-" // ไม่มีเรตติ้งจากแบ็กเอนด์แล้ว
 
-                        // Rating
-                        tvRating.text = if (rating != null && !rating.isNaN())
-                            "เรตติ้ง: ${String.format(Locale.US, "%.1f", rating)}" +
-                                    (if (reviews > 0) " (${NumberFormat.getIntegerInstance(Locale("th","TH")).format(reviews)} รีวิว)" else "")
-                        else "-"
-
-                        // Image
                         Glide.with(this@ProductDetailActivity)
-                            .load(img)
+                            .load(img ?: R.drawable.logo)
                             .placeholder(R.drawable.logo)
                             .error(R.drawable.logo)
                             .into(ivProduct)
 
-                        // URLs
-                        shopeeUrl = null
-                        lazadaUrl = null
-                        if (!bestUrl.isNullOrBlank()) {
-                            when (retailer) {
-                                "shopee" -> shopeeUrl = bestUrl
-                                "lazada" -> lazadaUrl = bestUrl
-                            }
+                        // ใช้ลิงก์ ProductLink เป็นหลัก
+                        if (!prodLink.isNullOrBlank()) {
+                            btnShopee.visibility = View.VISIBLE
+                            btnLazada.visibility = View.VISIBLE
+                            fallbackUrl = prodLink
+                        } else {
+                            // หากไม่มีลิงก์เลย ซ่อนปุ่ม
+                            btnShopee.visibility = if (fallbackUrl.isNullOrBlank()) View.GONE else View.VISIBLE
+                            btnLazada.visibility = if (fallbackUrl.isNullOrBlank()) View.GONE else View.VISIBLE
                         }
-                        if (shopeeUrl == null && prodLink?.contains("shopee", true) == true) shopeeUrl = prodLink
-                        if (lazadaUrl == null && prodLink?.contains("lazada", true) == true) lazadaUrl = prodLink
-
-                        // ปุ่ม: ซ่อนถ้าไม่มีลิงก์สักทาง และไม่มี fallback
-                        btnShopee.visibility = if (!shopeeUrl.isNullOrBlank() || !fallbackUrl.isNullOrBlank()) View.VISIBLE else View.GONE
-                        btnLazada.visibility = if (!lazadaUrl.isNullOrBlank() || !fallbackUrl.isNullOrBlank()) View.VISIBLE else View.GONE
 
                     } catch (e: Exception) {
                         Toast.makeText(this@ProductDetailActivity, "แปลงข้อมูลไม่ได้: ${e.message}", Toast.LENGTH_SHORT).show()

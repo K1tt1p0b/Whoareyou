@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
+import com.google.android.material.button.MaterialButton
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -28,15 +29,15 @@ class PrizeActivity : AppCompatActivity() {
     private lateinit var BASE_URL: String
 
     private lateinit var skinColorTextView: TextView
+    private lateinit var previewPaletteButton: MaterialButton
+    private lateinit var nextButton: MaterialButton
+    private lateinit var backButton: MaterialButton
     private lateinit var recommendedColorImageView: ImageView
 
-    // เก็บแยก 2 ค่า
-    private var undertoneForPalette: String? = null       // Warm/Cool/Neutral
-    private var brightnessForProducts: String? = null     // Fair/Medium/Deep
-
-    private var previewPaletteButton: Button? = null
-    private lateinit var nextButton: Button
-    private lateinit var backButton: Button
+    // ส่งต่อ / ใช้เรียกพาเล็ต
+    private var brightnessForProducts: String? = null       // Fair/Medium/Brown/Deep
+    private var brightnessForPalette: String? = null        // ใช้เรียกตารางสี
+    private var paletteVisible = false
 
     // OkHttp + JWT
     private val authClient: OkHttpClient by lazy {
@@ -73,49 +74,57 @@ class PrizeActivity : AppCompatActivity() {
         BASE_URL = getString(R.string.root_url).trim().removeSuffix("/")
 
         skinColorTextView = findViewById(R.id.skinColorTextView)
-        recommendedColorImageView = findViewById(R.id.recommendedColorImageView)
         previewPaletteButton = findViewById(R.id.previewPaletteButton)
         nextButton = findViewById(R.id.nextButton)
         backButton = findViewById(R.id.backButton)
+        recommendedColorImageView = findViewById(R.id.recommendedColorImageView)
 
-        // รับรูปและทำนายสีผิว
-        val imageUriString = intent.getStringExtra("imageUri")
-        if (imageUriString != null) {
-            uploadImageForSkinTonePrediction(Uri.parse(imageUriString))
-        } else {
+        // รับรูป → predict
+        intent.getStringExtra("imageUri")?.let {
+            uploadImageForSkinTonePrediction(Uri.parse(it))
+        } ?: run {
             Toast.makeText(this, "Image URI is missing for skin tone prediction", Toast.LENGTH_SHORT).show()
             skinColorTextView.text = "ไม่สามารถทำนายสีผิวได้"
         }
 
-        // ดูตารางสี = ใช้ Undertone
-        previewPaletteButton?.setOnClickListener {
-            val tone = undertoneForPalette
-            if (tone.isNullOrBlank()) {
+        // ปุ่มสลับดู/ซ่อนตารางสี (โหลดจาก API ตามโทน)
+        previewPaletteButton.setOnClickListener {
+            val b = brightnessForPalette
+            if (b.isNullOrBlank()) {
                 Toast.makeText(this, "ยังไม่ได้ผลทำนายสีผิว", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            fetchColorPalette(tone)
+            paletteVisible = !paletteVisible
+            if (paletteVisible) {
+                previewPaletteButton.text = "ซ่อนตารางสี"
+                fetchColorPaletteByBrightness(b)
+                recommendedColorImageView.visibility = View.VISIBLE
+            } else {
+                previewPaletteButton.text = "ดูตารางสี (ไม่บังคับ)"
+                recommendedColorImageView.setImageResource(R.drawable.logo)
+                recommendedColorImageView.visibility = View.VISIBLE
+            }
         }
 
-        // ไปหน้า Product = ส่ง Brightness (Fair/Medium/Deep)
+        // ไปหน้า Product
         nextButton.setOnClickListener {
-            if (brightnessForProducts == null) {
+            val b = brightnessForProducts
+            if (b == null) {
                 Toast.makeText(this, "กำลังรอผลทำนายสีผิว... กรุณาลองอีกครั้ง", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            val itn = Intent(this, ProductActivity::class.java).apply {
-                putExtra("EXTRA_SKIN_TONE", brightnessForProducts) // สำคัญ!
+            startActivity(Intent(this, ProductActivity::class.java).apply {
+                putExtra("EXTRA_SKIN_TONE", b)
                 putExtra("EXTRA_STYLE_NAME", "")
                 putExtra("EXTRA_STYLE_ID", -1)
                 putExtra("EXTRA_BUDGET", "")
-            }
-            startActivity(itn)
+            })
         }
 
         backButton.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
     }
 
-    // ---------- ทำนายสีผิว ----------
+    /** ---------------- predict skin tone ---------------- */
     private fun uploadImageForSkinTonePrediction(imageUri: Uri) {
         val file = getFileFromUri(imageUri)
         if (file == null || !file.exists()) {
@@ -139,60 +148,58 @@ class PrizeActivity : AppCompatActivity() {
                     skinColorTextView.text = "เกิดข้อผิดพลาดในการเชื่อมต่อ"
                 }
             }
-
             override fun onResponse(call: Call, response: Response) {
-                val bodyStr = if (response.isSuccessful) response.body?.string() else null
-                val errStr = if (!response.isSuccessful) response.body?.string() else null
+                val bodyStr = response.body?.string().orEmpty()
+                Log.d("PrizeActivity", "predict_skin_tone ${response.code}: ${bodyStr.take(500)}")
                 runOnUiThread {
-                    if (response.isSuccessful && bodyStr != null) {
-                        try {
-                            val json = JSONObject(bodyStr)
-
-                            val overall = json.getString("overall_undertone")       // Warm/Cool/Neutral
-                            val brightTh = json.optString("brightness_tone", "")     // โทนสว่าง/โทนกลาง/โทนเข้ม
-                            val brightDb = thBrightnessToDb(brightTh)                // Fair/Medium/Deep
-
-                            // โชว์ให้ผู้ใช้เข้าใจง่าย
-                            skinColorTextView.text = if (brightTh.isNotBlank())
-                                "$overall ($brightTh)"
-                            else
-                                overall
-
-                            // เก็บไว้ใช้
-                            undertoneForPalette = overall
-                            brightnessForProducts = brightDb
-
-                            Toast.makeText(
-                                this@PrizeActivity,
-                                "ทำนายสีผิวสำเร็จ: $overall / $brightDb",
-                                Toast.LENGTH_SHORT
-                            ).show()
-
-                        } catch (e: JSONException) {
-                            skinColorTextView.text = "ไม่สามารถอ่านผลลัพธ์สีผิวได้"
-                            Toast.makeText(this@PrizeActivity, "Failed to parse skin tone: ${e.message}", Toast.LENGTH_SHORT).show()
-                        }
-                    } else {
+                    if (!response.isSuccessful) {
                         skinColorTextView.text = "API เกิดข้อผิดพลาด: ${response.code}"
-                        Log.e("PrizeActivity", "Skin Tone API Error: ${response.code} - $errStr")
+                        return@runOnUiThread
+                    }
+                    try {
+                        val json = JSONObject(bodyStr)
+
+                        // รองรับหลาย schema จากแบ็กเอนด์
+                        val brightnessEn = when {
+                            json.has("final_brightness") -> json.getString("final_brightness")
+                            json.has("brightness_class") -> json.getString("brightness_class")
+                            json.has("brightness")       -> json.getString("brightness")
+                            else -> ""
+                        }
+                        val brightnessTh = when {
+                            json.has("brightness_label_th") -> json.getString("brightness_label_th")
+                            json.has("brightness_label")    -> json.getString("brightness_label")
+                            else -> ""
+                        }
+                        val confidence = json.optDouble(
+                            "confidence",
+                            json.optJSONObject("ai")?.optDouble("confidence", 0.0) ?: 0.0
+                        )
+
+                        if (brightnessEn.isNotBlank()) {
+                            skinColorTextView.text = if (brightnessTh.isNotBlank())
+                                "$brightnessTh ($brightnessEn) • ${"%.1f".format(confidence)}%"
+                            else
+                                "$brightnessEn • ${"%.1f".format(confidence)}%"
+                            brightnessForProducts = brightnessEn
+                            brightnessForPalette  = brightnessEn
+                        } else {
+                            skinColorTextView.text = "ไม่พบผลทำนายใน response"
+                            Toast.makeText(this@PrizeActivity, "อ่านผลทำนายไม่ได้", Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: JSONException) {
+                        skinColorTextView.text = "ไม่สามารถอ่านผลลัพธ์สีผิวได้"
+                        Toast.makeText(this@PrizeActivity, "Failed to parse: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
         })
     }
 
-    // แปลงไทย -> ค่าใน DB
-    private fun thBrightnessToDb(valTh: String?): String = when (valTh?.trim()) {
-        "โทนสว่าง" -> "Fair"
-        "โทนกลาง"  -> "Medium"
-        "โทนเข้ม"   -> "Deep"
-        else        -> "All"
-    }
-
-    // ---------- ตารางสี (ใช้ Undertone) ----------
-    private fun fetchColorPalette(skinTone: String) {
+    /** ---------------- palette by brightness (API แบบเดิม) ---------------- */
+    private fun fetchColorPaletteByBrightness(brightness: String) {
         val url = Uri.parse("$BASE_URL/ai/cosmetics/recommendations").buildUpon()
-            .appendQueryParameter("skinTone", skinTone)
+            .appendQueryParameter("skinTone", brightness)
             .build().toString()
 
         val request = Request.Builder().url(url).get().build()
@@ -201,35 +208,37 @@ class PrizeActivity : AppCompatActivity() {
             override fun onFailure(call: Call, e: IOException) {
                 runOnUiThread {
                     Toast.makeText(this@PrizeActivity, "ไม่สามารถโหลดตารางสีได้", Toast.LENGTH_SHORT).show()
-                    recommendedColorImageView.setImageResource(R.drawable.error_image)
+                    recommendedColorImageView.setImageResource(R.drawable.logo)
                 }
             }
-
             override fun onResponse(call: Call, response: Response) {
-                val bodyStr = if (response.isSuccessful) response.body?.string() else null
+                val bodyStr = response.body?.string().orEmpty()
+                Log.d("PrizeActivity", "palettes ${response.code}: ${bodyStr.take(300)}")
                 runOnUiThread {
-                    if (response.isSuccessful && bodyStr != null) {
-                        try {
-                            val json = JSONObject(bodyStr)
-                            val arr = json.getJSONArray("recommendedColorPalettes")
-                            if (arr.length() > 0) {
-                                val first = arr.getJSONObject(0)
-                                val filename = first.getString("ImageURL")
-                                val fullUrl = "$BASE_URL/palettes/${Uri.encode(filename)}"
-                                Glide.with(this@PrizeActivity)
-                                    .load(fullUrl)
-                                    .placeholder(R.drawable.logo)
-                                    .error(R.drawable.error_image)
-                                    .into(recommendedColorImageView)
-                            } else {
-                                recommendedColorImageView.setImageResource(R.drawable.logo)
-                            }
-                        } catch (e: JSONException) {
-                            Toast.makeText(this@PrizeActivity, "อ่านข้อมูลตารางสีไม่ได้", Toast.LENGTH_SHORT).show()
-                            recommendedColorImageView.setImageResource(R.drawable.error_image)
-                        }
-                    } else {
+                    if (!response.isSuccessful) {
                         Toast.makeText(this@PrizeActivity, "API ตารางสีผิดพลาด: ${response.code}", Toast.LENGTH_SHORT).show()
+                        recommendedColorImageView.setImageResource(R.drawable.error_image)
+                        return@runOnUiThread
+                    }
+                    try {
+                        val json = JSONObject(bodyStr)
+                        val arr = json.optJSONArray("recommendedColorPalettes")
+                        if (arr != null && arr.length() > 0) {
+                            // ✅ ที่ถูกต้องต้องใช้ index 0
+                            val first = arr.getJSONObject(0)
+                            val filename = first.getString("ImageURL")
+                            val fullUrl = "$BASE_URL/palettes/${Uri.encode(filename)}"
+                            Glide.with(this@PrizeActivity)
+                                .load(fullUrl)                    // รองรับ .jpg/.png
+                                .placeholder(R.drawable.logo)
+                                .error(R.drawable.error_image)
+                                .into(recommendedColorImageView)
+                        } else {
+                            Toast.makeText(this@PrizeActivity, "ไม่มีตารางสีสำหรับโทนนี้", Toast.LENGTH_SHORT).show()
+                            recommendedColorImageView.setImageResource(R.drawable.logo)
+                        }
+                    } catch (e: Exception) {
+                        Toast.makeText(this@PrizeActivity, "อ่านข้อมูลตารางสีไม่ได้", Toast.LENGTH_SHORT).show()
                         recommendedColorImageView.setImageResource(R.drawable.error_image)
                     }
                 }
@@ -237,7 +246,7 @@ class PrizeActivity : AppCompatActivity() {
         })
     }
 
-    // ---------- Utils ----------
+    /** utils */
     private fun getFileFromUri(uri: Uri): File? {
         return try {
             contentResolver.openInputStream(uri)?.use { input ->

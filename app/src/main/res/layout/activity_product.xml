@@ -9,7 +9,6 @@
     android:background="#FFF0F5"
     tools:context=".ProductActivity">
 
-    <!-- แถบฟิลเตอร์ (งบประมาณ + สไตล์) -->
     <LinearLayout
         android:id="@+id/spinner_container"
         android:layout_width="0dp"
@@ -43,7 +42,6 @@
             android:popupBackground="#FFF0F5" />
     </LinearLayout>
 
-    <!-- แถวค้นหา + รีเฟรช (ถ้าไม่ใช้ สามารถลบได้) -->
     <LinearLayout
         android:id="@+id/search_container"
         android:layout_width="0dp"
@@ -76,7 +74,6 @@
             android:src="@android:drawable/ic_popup_sync"/>
     </LinearLayout>
 
-    <!-- ตัวโหลด -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
@@ -86,7 +83,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- รายการสินค้า (ใช้ item_product.xml ที่เป็น MaterialCardView) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/product_recycler_view"
         android:layout_width="0dp"
@@ -99,7 +95,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- ข้อความเมื่อไม่พบสินค้า -->
     <TextView
         android:id="@+id/emptyView"
         android:layout_width="wrap_content"

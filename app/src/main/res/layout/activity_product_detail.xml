@@ -8,7 +8,6 @@
     android:background="#FCE4EC"
     tools:context=".ProductDetailActivity">
 
-    <!-- Top bar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topBar"
         android:layout_width="0dp"
@@ -21,7 +20,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Loading -->
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progressBar"
         android:layout_width="40dp"
@@ -32,7 +30,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- เนื้อหาเลื่อนขึ้นลงได้ -->
     <ScrollView
         android:id="@+id/contentScroll"
         android:layout_width="0dp"
@@ -91,7 +88,7 @@
                         android:textColor="@android:color/black"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        tools:text="SKINTIFIC Perfect Stay Velvet Matte Cushion 11ml #03N Natural Petal" />
+                        tools:text="ชื่อสินค้า" />
 
                     <TextView
                         android:id="@+id/productMetaTextView"
@@ -110,7 +107,7 @@
                         android:gravity="center"
                         android:textColor="@android:color/darker_gray"
                         android:textSize="14sp"
-                        tools:text="รายละเอียดสินค้า หรือคำอธิบายสั้นๆ" />
+                        tools:text="รายละเอียดสินค้า" />
 
                     <TextView
                         android:id="@+id/productRatingTextView"
@@ -119,47 +116,16 @@
                         android:layout_marginTop="12dp"
                         android:textColor="@android:color/darker_gray"
                         android:textSize="13sp"
-                        tools:text="เรตติ้ง: 4.8 (2,345 รีวิว)" />
-
-                    <TextView
-                        android:id="@+id/tvConfidence"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="ความมั่นใจ ~ 0% (—)"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/darker_gray"
-                        android:layout_marginTop="4dp"/>
-
-                    <TextView
-                        android:id="@+id/tvBadges"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Official"
-                        android:textColor="@android:color/darker_gray"
-                        android:textSize="12sp"
-                        android:layout_marginTop="2dp"/>
-
-                    <TextView
-                        android:id="@+id/tvReasons"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textColor="@android:color/darker_gray"
-                        android:textSize="14sp"
-                        android:text="• เหตุผลที่เราแนะนำจะขึ้นตรงนี้"/>
-
-
+                        tools:text="-" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- เว้นพื้นที่ด้านล่างนิดหน่อย -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="80dp" />
         </LinearLayout>
     </ScrollView>
 
-    <!-- ปุ่มร้านค้า (MaterialButton เพื่อใช้ stroke/backgroundTint ได้จริง) -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/shopeeButton"
         android:layout_width="0dp"
@@ -167,7 +133,7 @@
         android:layout_marginStart="48dp"
         android:layout_marginEnd="48dp"
         android:layout_marginBottom="12dp"
-        android:text="Shopee"
+        android:text="ไปหน้าสินค้า"
         android:textAllCaps="false"
         android:textColor="@color/black"
         app:backgroundTint="#FFFBEA"
@@ -185,7 +151,7 @@
         android:layout_marginStart="48dp"
         android:layout_marginEnd="48dp"
         android:layout_marginBottom="24dp"
-        android:text="Lazada"
+        android:text="ลิงก์สำรอง"
         android:textAllCaps="false"
         android:textColor="@color/black"
         app:backgroundTint="#FFFBEA"

@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -40,7 +39,6 @@ class ProductActivity : AppCompatActivity() {
 
     private val ALL_LABEL = "ทั้งหมด"
 
-    // --- OkHttp + JWT ---
     private val authClient: OkHttpClient by lazy {
         val auth = Interceptor { chain ->
             val prefs = getSharedPreferences("UserSession", MODE_PRIVATE)
@@ -68,7 +66,6 @@ class ProductActivity : AppCompatActivity() {
 
         BASE_URL = getString(R.string.root_url).trim().removeSuffix("/")
 
-        // Bind views
         budgetSpinner  = findViewById(R.id.budget_spinner)
         styleSpinner   = findViewById(R.id.style_spinner)
         searchInput    = findViewById(R.id.searchInput)
@@ -77,12 +74,10 @@ class ProductActivity : AppCompatActivity() {
         emptyView      = findViewById(R.id.emptyView)
         recyclerView   = findViewById(R.id.product_recycler_view)
 
-        // RecyclerView
         adapter = ProductAdapter()
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
-        // คลิกการ์ด -> เปิดหน้า Detail
         adapter.onItemClick = { item ->
             val intent = Intent(this, ProductDetailActivity::class.java).apply {
                 putExtra("PRODUCT_ID", item.id ?: -1)
@@ -91,7 +86,6 @@ class ProductActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // ----- งบประมาณ: แทรก "ทั้งหมด" ไว้บนสุด -----
         val budgetList = resources.getStringArray(R.array.budget_options).toMutableList()
         if (budgetList.firstOrNull() != ALL_LABEL) budgetList.add(0, ALL_LABEL)
         val budgetAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, budgetList)
@@ -99,11 +93,9 @@ class ProductActivity : AppCompatActivity() {
         budgetSpinner.adapter = budgetAdapter
         budgetSpinner.setSelection(0, false)
 
-        // สไตล์: ตอนแรกมีแค่ "ทั้งหมด" ก่อน แล้วค่อยโหลดจริง
         setupStyleSpinner(emptyList())
         fetchMakeupLooksForSpinner()
 
-        // events
         budgetSpinner.onItemSelectedListener = simpleListener { triggerFetch() }
         styleSpinner.onItemSelectedListener  = simpleListener { triggerFetch() }
         refreshButton.setOnClickListener { triggerFetch() }
@@ -119,10 +111,9 @@ class ProductActivity : AppCompatActivity() {
         searchInput.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { /* debounce ได้ภายหลัง */ }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        // โหลดสินค้าแรกเข้า
         triggerFetch()
     }
 
@@ -137,7 +128,6 @@ class ProductActivity : AppCompatActivity() {
         fetchRecommendedProducts()
     }
 
-    // ---------- MAKEUP LOOKS ----------
     private fun fetchMakeupLooksForSpinner() {
         val url = "$BASE_URL/ai/makeup_looks"
         val req = Request.Builder().url(url).get().build()
@@ -146,7 +136,7 @@ class ProductActivity : AppCompatActivity() {
             override fun onFailure(call: Call, e: IOException) {
                 runOnUiThread {
                     Toast.makeText(this@ProductActivity, "โหลดสไตล์ไม่ได้: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
-                    setupStyleSpinner(emptyList()) // เหลือ "ทั้งหมด"
+                    setupStyleSpinner(emptyList())
                 }
             }
             override fun onResponse(call: Call, response: Response) {
@@ -155,13 +145,12 @@ class ProductActivity : AppCompatActivity() {
                 runOnUiThread {
                     try {
                         if (!response.isSuccessful || !ct.contains("application/json")) {
-                            setupStyleSpinner(emptyList())
-                            return@runOnUiThread
+                            setupStyleSpinner(emptyList()); return@runOnUiThread
                         }
                         val looks = parseMakeupLooks(bodyStr)
                         makeupLooks = looks
                         setupStyleSpinner(looks.map { it.name })
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         setupStyleSpinner(emptyList())
                     }
                 }
@@ -200,12 +189,9 @@ class ProductActivity : AppCompatActivity() {
         val obj = JSONObject(t)
         val keys = listOf("looks", "data", "items", "results")
         for (k in keys) if (obj.has(k)) return mapArr(obj.getJSONArray(k))
-        if (obj.has("message")) throw IllegalStateException(obj.getString("message"))
-        if (obj.has("error")) throw IllegalStateException(obj.get("error").toString())
         throw IllegalStateException("ไม่พบลิสต์สไตล์")
     }
 
-    // ---------- PRODUCTS ----------
     private fun fetchRecommendedProducts() {
         if (productsLoaded) return
         productsLoaded = true
@@ -220,7 +206,6 @@ class ProductActivity : AppCompatActivity() {
             else -> "All"
         }
 
-        // ถ้าเลือก "ทั้งหมด" = ไม่ส่งไป
         val budget = budgetSpinner.selectedItem?.toString()
             ?.takeIf { it.isNotBlank() && it != ALL_LABEL }
 
@@ -234,15 +219,12 @@ class ProductActivity : AppCompatActivity() {
 
         val builder = Uri.parse("$BASE_URL/ai/cosmetics/recommendations").buildUpon()
             .appendQueryParameter("skinTone", skinToneForApi)
-
         if (budget != null) builder.appendQueryParameter("budget", budget)
         if (styleName != null) builder.appendQueryParameter("lookType", styleName)
         if (styleId != null && styleId >= 0) builder.appendQueryParameter("styleId", styleId.toString())
         if (q != null) builder.appendQueryParameter("q", q)
 
         val url = builder.build().toString()
-        Log.d("ProductActivity", "GET $url")
-
         val req = Request.Builder().url(url).get().build()
 
         authClient.newCall(req).enqueue(object : Callback {
@@ -262,12 +244,9 @@ class ProductActivity : AppCompatActivity() {
                         showLoading(false)
                         if (!response.isSuccessful || !ct.contains("application/json")) {
                             productsLoaded = false
-                            Log.e("ProductActivity", "Products API ${response.code} - ${bodyStr.take(400)}")
-                            renderProducts(emptyList())
-                            return@runOnUiThread
+                            renderProducts(emptyList()); return@runOnUiThread
                         }
                         val items = parseProducts(bodyStr)
-                        Log.d("ProductActivity", "products size = ${items.size}")
                         renderProducts(items)
                     } catch (e: Exception) {
                         productsLoaded = false
@@ -285,32 +264,34 @@ class ProductActivity : AppCompatActivity() {
             for (i in 0 until arr.length()) {
                 val o = arr.getJSONObject(i)
 
-                val priceRaw  = if (o.has("priceTHB")) o.optDouble("priceTHB", Double.NaN)
-                else if (o.has("bestPrice")) o.optDouble("bestPrice", Double.NaN)
-                else o.optDouble("Price", Double.NaN)
+                val priceRaw  = o.optDouble("Price", Double.NaN)
 
-                val ratingRaw = if (o.has("rating")) o.optDouble("rating", Double.NaN)
-                else o.optDouble("bestRating", Double.NaN)
+                val reasons = mutableListOf<String>()
+                o.optJSONArray("reasons")?.let { a ->
+                    for (k in 0 until a.length()) reasons.add(a.optString(k))
+                }
 
-                val reviewRaw = if (o.has("reviewCount")) o.optInt("reviewCount")
-                else o.optInt("bestReviews")
+                val badges = mutableListOf<String>()
+                o.optJSONArray("badges")?.let { a ->
+                    for (k in 0 until a.length()) badges.add(a.optString(k))
+                }
 
                 out.add(
                     ProductItem(
                         id         = if (o.has("CosmeticID")) o.optInt("CosmeticID") else null,
                         brandName  = o.optString("brandName", o.optString("brand", "")),
-                        productName= o.optString("productName",
-                            o.optString("Name", o.optString("name",""))),
-                        category   = o.optString("category", o.optString("Type", null)),
-                        shadeName  = o.optString("shadeName", o.optString("ShadeName", null)),
-                        shadeCode  = o.optString("shadeCode", o.optString("ShadeCode", null)),
-                        priceTHB   = priceRaw.let { if (it.isNaN()) null else it },
-                        rating     = ratingRaw.let { if (it.isNaN()) null else it },
-                        reviewCount= if (reviewRaw == 0) null else reviewRaw,
-                        imageURL   = o.optString("imageURL", o.optString("ImageURL", null)),
-                        productURL = o.optString("retailerProductURL",
-                            o.optString("bestURL", o.optString("ProductLink", null))),
-                        shopURL    = o.optString("retailerShopURL", null)
+                        productName= o.optString("Name", o.optString("name","")),
+                        category   = o.optString("Type", null),
+                        shadeName  = o.optString("Shade", null),
+                        shadeCode  = null,
+                        priceTHB   = if (priceRaw.isNaN()) null else priceRaw,
+                        imageURL   = o.optString("ImageURL", null),
+                        productURL = o.optString("ProductLink", null),
+                        hybridConfidence = if (o.has("hybrid_confidence")) o.optInt("hybrid_confidence") else null,
+                        confidenceLevel  = o.optString("confidence_level", null),
+                        deltaE00         = if (o.has("deltaE00")) o.optDouble("deltaE00", Double.NaN).takeIf { !it.isNaN() } else null,
+                        badges = badges,
+                        reasons = reasons
                     )
                 )
             }
@@ -322,8 +303,6 @@ class ProductActivity : AppCompatActivity() {
         val obj = JSONObject(t)
         val keys = listOf("recommendedCosmetics", "data", "items", "results", "products")
         for (k in keys) if (obj.has(k)) return mapArr(obj.getJSONArray(k))
-        if (obj.has("message")) throw IllegalStateException(obj.getString("message"))
-        if (obj.has("error")) throw IllegalStateException(obj.get("error").toString())
         throw IllegalStateException("ไม่พบลิสต์สินค้า")
     }
 

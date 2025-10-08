@@ -13,6 +13,7 @@ import com.kittipob.whoareyou.R
 import com.kittipob.whoareyou.net.ApiConfig
 import java.text.NumberFormat
 import java.util.Locale
+import kotlin.math.roundToInt
 
 class ProductAdapter : ListAdapter<ProductItem, ProductAdapter.VH>(DIFF) {
 
@@ -24,7 +25,6 @@ class ProductAdapter : ListAdapter<ProductItem, ProductAdapter.VH>(DIFF) {
         private val DIFF = object : DiffUtil.ItemCallback<ProductItem>() {
             override fun areItemsTheSame(old: ProductItem, new: ProductItem) =
                 (old.id == new.id)
-
             override fun areContentsTheSame(old: ProductItem, new: ProductItem) =
                 (old == new)
         }
@@ -35,12 +35,14 @@ class ProductAdapter : ListAdapter<ProductItem, ProductAdapter.VH>(DIFF) {
         val tvBrand: TextView  = v.findViewById(R.id.productBrand)
         val tvName: TextView   = v.findViewById(R.id.productName)
         val tvPrice: TextView  = v.findViewById(R.id.productPrice)
-        val tvConfidence: TextView = v.findViewById(R.id.tvConfidence) // ต้องมีใน layout
-        val tvBadges: TextView     = v.findViewById(R.id.tvBadges)     // ต้องมีใน layout
+
+        val tvConfidence: TextView = v.findViewById(R.id.tvConfidence)
+        val tvBadges: TextView     = v.findViewById(R.id.tvBadges)
+        val tvDelta: TextView      = v.findViewById(R.id.tvDelta)
+        val tvReasons: TextView    = v.findViewById(R.id.tvReasons)
 
         init {
             v.setOnClickListener {
-                @Suppress("DEPRECATION")
                 val pos = adapterPosition
                 if (pos == RecyclerView.NO_POSITION) return@setOnClickListener
                 onItemClick?.invoke(getItem(pos))
@@ -60,13 +62,12 @@ class ProductAdapter : ListAdapter<ProductItem, ProductAdapter.VH>(DIFF) {
         h.tvBrand.text = it.brandName.orEmpty()
         h.tvName.text  = it.productName.orEmpty()
 
-        h.tvPrice.text = it.bestPrice?.let { p ->
-            NumberFormat.getNumberInstance(TH).format(p) + " บาท"
-        } ?: it.priceTHB?.let { p ->
+        val priceText = it.priceTHB?.let { p ->
             NumberFormat.getNumberInstance(TH).format(p) + " บาท"
         } ?: "-"
+        h.tvPrice.text = priceText
 
-        val conf = it.hybridConfidence ?: 0
+        val conf = (it.hybridConfidence ?: 0).coerceIn(0, 100)
         val level = it.confidenceLevel ?: "-"
         h.tvConfidence.text = "ความมั่นใจ ~ ${conf}% ($level)"
 
@@ -78,11 +79,23 @@ class ProductAdapter : ListAdapter<ProductItem, ProductAdapter.VH>(DIFF) {
             }
         } ?: ""
 
-        // ✅ ต่อ BASE_URL ถ้าเป็น path
-        val img = ApiConfig.fullUrl(it.imageURL)
+        it.deltaE00?.let { d ->
+            h.tvDelta.visibility = View.VISIBLE
+            val dText = if (d.isNaN()) "—" else String.format(Locale.US, "%.1f", d)
+            h.tvDelta.text = "ΔE00: $dText"
+        } ?: run { h.tvDelta.visibility = View.GONE }
 
+        val reasons = it.reasons?.takeIf { r -> r.isNotEmpty() }?.joinToString("\n") { r -> "• $r" }
+        if (!reasons.isNullOrBlank()) {
+            h.tvReasons.visibility = View.VISIBLE
+            h.tvReasons.text = reasons
+        } else {
+            h.tvReasons.visibility = View.GONE
+        }
+
+        val img = ApiConfig.fullUrl(it.imageURL)
         Glide.with(h.itemView)
-            .load(img)
+            .load(img ?: R.drawable.logo)
             .placeholder(R.drawable.logo)
             .error(R.drawable.logo)
             .into(h.iv)
