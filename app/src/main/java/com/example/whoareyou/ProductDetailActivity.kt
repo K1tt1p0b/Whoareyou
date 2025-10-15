@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import okhttp3.*
 import org.json.JSONObject
@@ -18,9 +20,7 @@ import java.io.IOException
 import java.text.NumberFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit
-import kotlin.math.roundToInt
 import com.kittipob.whoareyou.net.ApiConfig
-
 
 class ProductDetailActivity : AppCompatActivity() {
 
@@ -35,8 +35,16 @@ class ProductDetailActivity : AppCompatActivity() {
     private lateinit var tvMeta: TextView
     private lateinit var tvDesc: TextView
     private lateinit var tvRating: TextView
+    private lateinit var tvSuitReason: TextView     // ✅ เหตุผล/คำแนะนำ (บรรทัดแยก)
+    private lateinit var labelDescription: TextView // ✅ หัวข้อ "รายละเอียด"
+    private lateinit var labelSuitability: TextView // ✅ หัวข้อ "ความเหมาะสมกับผิว"
     private lateinit var btnShopee: MaterialButton
-    private lateinit var btnLazada: MaterialButton
+    private lateinit var btnBack: MaterialButton
+
+    // meta chips
+    private lateinit var chipGroupMeta: ChipGroup
+    private lateinit var chipType: Chip
+    private lateinit var chipShade: Chip
 
     private var fallbackUrl: String? = null
 
@@ -65,29 +73,37 @@ class ProductDetailActivity : AppCompatActivity() {
 
         BASE_URL = getString(R.string.root_url).trim().removeSuffix("/")
 
-        topBar     = findViewById(R.id.topBar)
-        progressBar= findViewById(R.id.progressBar)
-        ivProduct  = findViewById(R.id.productImageView)
-        tvPrice    = findViewById(R.id.productPriceTextView)
-        tvTitle    = findViewById(R.id.productTitleTextView)
-        tvMeta     = findViewById(R.id.productMetaTextView)
-        tvDesc     = findViewById(R.id.productDescriptionTextView)
-        tvRating   = findViewById(R.id.productRatingTextView) // ใช้แสดง “ระดับความเหมาะสม”
-        btnShopee  = findViewById(R.id.shopeeButton)
-        btnLazada  = findViewById(R.id.lazadaButton)
+        topBar      = findViewById(R.id.topBar)
+        progressBar = findViewById(R.id.progressBar)
+        ivProduct   = findViewById(R.id.productImageView)
+        tvPrice     = findViewById(R.id.productPriceTextView)
+        tvTitle     = findViewById(R.id.productTitleTextView)
+        tvMeta      = findViewById(R.id.productMetaTextView)
+        tvDesc      = findViewById(R.id.productDescriptionTextView)
+        tvRating    = findViewById(R.id.productRatingTextView)
+        tvSuitReason     = findViewById(R.id.productSuitReasonTextView)
+        labelDescription = findViewById(R.id.labelDescription)
+        labelSuitability = findViewById(R.id.labelSuitability)
+        btnShopee   = findViewById(R.id.shopeeButton)
+        btnBack     = findViewById(R.id.backButton)
 
+        chipGroupMeta = findViewById(R.id.chipGroupMeta)
+        chipType      = findViewById(R.id.chipType)
+        chipShade     = findViewById(R.id.chipShade)
+
+        // appbar back
         topBar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
         val productId = intent.getIntExtra("PRODUCT_ID", -1)
         fallbackUrl   = intent.getStringExtra("FALLBACK_URL")
 
         if (productId == -1) {
-            Toast.makeText(this, "ไม่พบรหัสสินค้า", Toast.LENGTH_SHORT).show()
+            toast("ไม่พบรหัสสินค้า")
             finish(); return
         }
 
         btnShopee.setOnClickListener { openUrlSafe(fallbackUrl) }
-        btnLazada.setOnClickListener { openUrlSafe(fallbackUrl) }
+        btnBack.setOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
         fetchDetail(productId)
     }
@@ -98,13 +114,13 @@ class ProductDetailActivity : AppCompatActivity() {
 
     private fun openUrlSafe(url: String?) {
         if (url.isNullOrBlank()) {
-            Toast.makeText(this, "ยังไม่มีลิงก์ร้านสำหรับสินค้านี้", Toast.LENGTH_SHORT).show()
+            toast("ยังไม่มีลิงก์ร้านสำหรับสินค้านี้")
             return
         }
         try {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         } catch (_: Exception) {
-            Toast.makeText(this, "เปิดลิงก์ไม่สำเร็จ", Toast.LENGTH_SHORT).show()
+            toast("เปิดลิงก์ไม่สำเร็จ")
         }
     }
 
@@ -114,18 +130,18 @@ class ProductDetailActivity : AppCompatActivity() {
         val req = Request.Builder().url(url).get().build()
 
         authClient.newCall(req).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                runOnUiThread {
-                    showLoading(false)
-                    Toast.makeText(this@ProductDetailActivity, "โหลดรายละเอียดไม่สำเร็จ: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
-                }
+            override fun onFailure(call: Call, e: IOException) = runOnUiThread {
+                showLoading(false)
+                toast("โหลดรายละเอียดไม่สำเร็จ: ${e.localizedMessage}")
             }
+
             override fun onResponse(call: Call, response: Response) {
+
                 val bodyStr = response.body?.string().orEmpty()
                 runOnUiThread {
                     showLoading(false)
                     if (!response.isSuccessful) {
-                        Toast.makeText(this@ProductDetailActivity, "API ผิดพลาด: ${response.code}", Toast.LENGTH_SHORT).show()
+                        toast("API ผิดพลาด: ${response.code}")
                         return@runOnUiThread
                     }
                     try {
@@ -134,18 +150,33 @@ class ProductDetailActivity : AppCompatActivity() {
 
                         val brand = item.optString("brandName")
                         val name  = item.optString("Name")
-                        val typeFromApi  = item.optString("Type", "")
-                        val shade = item.optString("Shade", "")
+
+                        val typeFromApi  = item.optString("Type", "").trim()
+
+                        // ใช้ ShadeName เป็นหลัก ถ้าไม่มีให้ใช้ ShadeCode
+                        val shadeName = item.optString("ShadeName", "").trim()
+                        val shadeCode = item.optString("ShadeCode", "").trim()
+                        val displayShade = when {
+                            shadeName.isNotEmpty() -> shadeName
+                            shadeCode.isNotEmpty() -> shadeCode
+                            else -> ""
+                        }
+
                         val price = item.optDouble("Price", Double.NaN)
                         val img   = item.optString("ImageURL", null)
                         val imgUrl = ApiConfig.fullUrl(img)
                         val prodLink = item.optString("ProductLink", null)
+
+                        // Description: ถ้า API ไม่มี ให้ประกอบจาก type + displayShade
                         val descApi  = item.optString(
                             "Description",
-                            listOfNotNull(typeFromApi.ifBlank { null }, shade.ifBlank { null }).joinToString(" • ")
+                            listOfNotNull(
+                                typeFromApi.ifBlank { null },
+                                displayShade.ifBlank { null }
+                            ).joinToString(" • ")
                         )
 
-                        // ---------- เติม “ระดับความเหมาะสม” จาก extras (ที่ส่งมาจากลิสต์) ----------
+                        // ---------- ความเหมาะสมจาก extras ----------
                         val typeExtra   = intent.getStringExtra("EXTRA_TYPE")
                         val deltaExtra  = intent.getDoubleExtra("EXTRA_DELTAE00", Double.NaN)
                         val confExtra   = intent.getIntExtra("EXTRA_CONF", -1)
@@ -158,110 +189,153 @@ class ProductDetailActivity : AppCompatActivity() {
                         else null
 
                         // Title
-                        tvTitle.text = if (brand.isNotBlank()) "$brand\n$name" else name
+                        tvTitle.text = buildString {
+                            if (brand.isNotBlank()) append(brand).append('\n')
+                            append(name)
+                        }
 
-                        // Meta
-                        tvMeta.text = buildString {
-                            if (typeFromApi.isNotBlank()) append("ประเภท: $typeFromApi")
-                            if (shade.isNotBlank()) {
-                                if (isNotEmpty()) append(" • ")
-                                append("เฉด: $shade")
-                            }
-                        }.ifBlank { "-" }
+                        // Chips meta
+                        applyMetaChips(typeFromApi, displayShade)
+
+                        // Fallback meta text (ถ้ามีชิปแล้วซ่อนข้อความ)
+                        tvMeta.text = metaText(typeFromApi, displayShade)
+                        tvMeta.visibility = if (chipGroupMeta.visibility == View.VISIBLE) View.GONE else View.VISIBLE
 
                         // Price
-                        tvPrice.text = if (!price.isNaN())
-                            NumberFormat.getNumberInstance(Locale("th","TH")).format(price) + " บาท"
-                        else "-"
+                        tvPrice.text = if (!price.isNaN()) formatBaht(price) else "-"
 
-                        // Description
-                        tvDesc.text = buildString {
-                            append(descApi.ifBlank { "-" })
-                            // ต่อท้ายเหตุผลถ้ามี
-                            val extraReason = suitability?.second?.takeIf { it.isNotBlank() } ?: reasonExtra
-                            if (!extraReason.isNullOrBlank()) {
-                                append("\n• "); append(extraReason)
-                            }
-                        }
+                        // ====== แยกหัวข้อ ======
 
-                        // แทนค่า “rating” เดิมด้วย “ระดับความเหมาะสม”
+                        // รายละเอียด (ไม่ปนเหตุผลอีกแล้ว)
+                        tvDesc.text = descApi.ifBlank { "-" }
+
+                        // สรุประดับความเหมาะสม + ความมั่นใจ
                         tvRating.text = buildString {
                             append("ระดับความเหมาะสม: ")
-                            if (suitability != null) {
-                                append(suitability.first)               // เช่น เหมาะมาก / คอนทราสต์สวย
-                            } else {
-                                append("-")
-                            }
-                            // โชว์ความมั่นใจรวมจากลิสต์ ถ้ามี
-                            if (confExtra >= 0 && !levelExtra.isNullOrBlank()) {
-                                append("  •  ")
-                                append("ความมั่นใจ ~ ${confExtra.coerceIn(0,100)}% ($levelExtra)")
+                            append(suitability?.first ?: "-")
+                            if (confExtra in 0..100 && !levelExtra.isNullOrBlank()) {
+                                append("  •  ความมั่นใจ ~ ${confExtra}% ($levelExtra)")
                             }
                         }
 
+                        // เหตุผล/คำแนะนำ (บรรทัดแยก)
+                        val extraReason = (suitability?.second?.takeIf { it.isNotBlank() } ?: reasonExtra)?.trim()
+                        if (!extraReason.isNullOrEmpty()) {
+                            tvSuitReason.visibility = View.VISIBLE
+                            tvSuitReason.text = "• $extraReason"
+                        } else {
+                            tvSuitReason.visibility = View.GONE
+                        }
+
+                        // ภาพ
                         Glide.with(this@ProductDetailActivity)
-                            .load(ApiConfig.fullUrl(img) ?: R.drawable.logo)  // ใช้ fullUrl ตรงนี้!
+                            .load(imgUrl ?: R.drawable.logo)
                             .placeholder(R.drawable.logo)
                             .error(R.drawable.logo)
                             .into(ivProduct)
 
                         // ลิงก์ร้าน
-                        if (!prodLink.isNullOrBlank()) {
-                            btnShopee.visibility = View.VISIBLE
-                            btnLazada.visibility = View.VISIBLE
-                            fallbackUrl = prodLink
-                        } else {
-                            val show = !fallbackUrl.isNullOrBlank()
-                            btnShopee.visibility = if (show) View.VISIBLE else View.GONE
-                            btnLazada.visibility = if (show) View.VISIBLE else View.GONE
-                        }
+                        fallbackUrl = prodLink ?: fallbackUrl
+                        btnShopee.visibility = if (!fallbackUrl.isNullOrBlank()) View.VISIBLE else View.GONE
+
+                        btnBack.visibility = View.VISIBLE
 
                     } catch (e: Exception) {
-                        Toast.makeText(this@ProductDetailActivity, "แปลงข้อมูลไม่ได้: ${e.message}", Toast.LENGTH_SHORT).show()
+                        toast("แปลงข้อมูลไม่ได้: ${e.message}")
                     }
                 }
             }
         })
     }
 
+    // ---------- Helpers ----------
+    private fun formatBaht(price: Double): String {
+        val fmt = NumberFormat.getNumberInstance(Locale("th","TH"))
+        return fmt.format(price) + " บาท"
+    }
+
+    private fun metaText(type: String?, shade: String?): String {
+        val t = (type ?: "").trim()
+        val s = (shade ?: "").trim()
+        return buildString {
+            if (t.isNotEmpty()) append("ประเภท: ").append(t)
+            if (s.isNotEmpty()) {
+                if (isNotEmpty()) append(" • ")
+                append("เฉด: ").append(s)
+            }
+        }.ifBlank { "-" }
+    }
+
+    private fun applyMetaChips(type: String?, shade: String?) {
+        val t = (type ?: "").trim()
+        val s = (shade ?: "").trim()
+
+        if (t.isNotEmpty()) {
+            chipType.text = "ประเภท: $t"
+            chipType.visibility = View.VISIBLE
+        } else {
+            chipType.visibility = View.GONE
+        }
+
+        if (s.isNotEmpty()) {
+            chipShade.text = "เฉด: $s"
+            chipShade.visibility = View.VISIBLE
+        } else {
+            chipShade.visibility = View.GONE
+        }
+
+        chipGroupMeta.visibility =
+            if (chipType.visibility == View.GONE && chipShade.visibility == View.GONE)
+                View.GONE else View.VISIBLE
+    }
+
+    private fun toast(msg: String) =
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+
     // ---------- แปลง ΔE00 เป็นคำอธิบายเข้าใจง่าย ----------
     private fun mapSuitability(productType: String?, deltaE00: Double?): Pair<String, String> {
-        if (deltaE00 == null) return "ไม่พบข้อมูลสี" to "สินค้ายังไม่มีค่าสีสำหรับประเมิน"
+        if (deltaE00 == null)
+            return "ยังไม่มีข้อมูลสี" to "สินค้านี้ยังไม่มีข้อมูลเพียงพอสำหรับเทียบสีผิว"
+
         val d = deltaE00
         val t = (productType ?: "").lowercase()
 
-        val isComplexion = listOf("foundation","concealer","bb","cc","tinted","powder","cushion","contour","bronzer","base").any { t.contains(it) }
-        val isLipOrBlush = listOf("lip","lipstick","gloss","oil","tint","stain","kit","liner","blush","cheek").any { t.contains(it) }
-        val isEye        = listOf("eyeshadow","eye shadow","eyeliner","mascara").any { t.contains(it) }
-        val isBrow       = listOf("brow","eyebrow").any { t.contains(it) }
-
-
+        val isComplexion = listOf("foundation","concealer","bb","cc","tinted","powder","cushion","contour","bronzer","base")
+            .any { t.contains(it) }
+        val isLipOrBlush = listOf("lip","lipstick","gloss","oil","tint","stain","kit","liner","blush","cheek")
+            .any { t.contains(it) }
+        val isEye = listOf("eyeshadow","eye shadow","eyeliner","mascara")
+            .any { t.contains(it) }
+        val isBrow = listOf("brow","eyebrow")
+            .any { t.contains(it) }
 
         return when {
             isComplexion -> when {
-                d <= 2  -> "เหมาะมาก"   to "สีผิวแทบตรงกัน"
-                d <= 4  -> "ใกล้เคียง"  to "เฉดใกล้ผิว แนะนำลองที่แนวกราม"
-                d <= 6  -> "พอใช้"     to "อาจต้องบาลานซ์ด้วยไฮไลต์/คอนซีลเลอร์"
-                else    -> "ต่างจากผิว" to "มีโอกาสเพี้ยนเมื่อทาทั่วหน้า"
+                d <= 2  -> "ตรงกับผิวมาก" to "สีนี้ใกล้เคียงผิวจริงมาก ทาแล้วดูกลืนกับหน้า"
+                d <= 4  -> "ใกล้สีผิว"    to "เฉดใกล้ผิว แนะนำลองทาบริเวณกรามเพื่อเช็กความพอดี"
+                d <= 6  -> "พอใช้ได้"     to "สีอาจอ่อนหรือเข้มกว่าผิวเล็กน้อย ปรับได้ด้วยแป้งหรือคอนซีลเลอร์"
+                else    -> "ไม่เข้ากับผิว" to "สีต่างจากผิวชัด อาจทำให้หน้าดูหมองหรือวอก"
             }
             isLipOrBlush -> when {
-                d in 15.0..25.0 -> "คอนทราสต์สวย" to "ช่วยให้ใบหน้าดูมีชีวิตชีวา"
-                d in 25.0..40.0 -> "เด่นชัด"     to "สีจัดขึ้น เหมาะกับลุคชัด"
-                else            -> "โทนสุภาพ"    to "คอนทราสต์ไม่แรง ใช้ได้ทุกวัน"
+                d in 15.0..25.0 -> "เข้ากับผิว" to "ช่วยให้หน้าดูสดใส สุขภาพดี"
+                d in 25.0..40.0 -> "ดูโดดเด่น"  to "สีจัดขึ้น เหมาะกับลุคแต่งหน้าเต็ม"
+                else            -> "ดูสุภาพ"    to "สีอ่อนกำลังดี เหมาะกับลุคธรรมชาติ"
             }
             isEye -> when {
-                d in 20.0..45.0 -> "ดวงตาเด่น"   to "คอนทราสต์กำลังดี ช่วยขับตา"
-                d in 45.0..60.0 -> "ลุคจัดชัด"   to "โทนชัด เหมาะกับแต่งเต็ม"
-                else            -> "โทนอ่อน"     to "สุภาพ/ธรรมชาติ"
+                d in 20.0..45.0 -> "ขับดวงตา"   to "สีช่วยให้ตาดูเด่นขึ้นอย่างพอดี"
+                d in 45.0..60.0 -> "ดูจัดชัด"   to "สีเข้ม เหมาะกับลุคแต่งเต็มหรือออกงาน"
+                else            -> "ดูเบา ๆ"    to "สีอ่อน เหมาะกับลุคธรรมชาติทุกวัน"
             }
             isBrow -> when {
-                d <= 5   -> "กลืนผิว"   to "โทนคิ้วใกล้ธรรมชาติ"
-                d <= 12  -> "ใกล้เคียง" to "อาจต้องปรับความเข้มเล็กน้อย"
-                d <= 20  -> "พอใช้"     to "ควรเบลนด์เพื่อให้เนียน"
-                else     -> "ต่างโทน"   to "อาจเข้มหรืออ่อนเกินไป"
+                d <= 5   -> "ธรรมชาติ"    to "สีคิ้วกลืนกับผิว ดูเป็นธรรมชาติ"
+                d <= 12  -> "ใกล้เคียง"  to "สีใกล้เคียงกับผิวและสีผม"
+                d <= 20  -> "พอใช้ได้"    to "อาจต้องเกลี่ยเพิ่มให้เนียนกับผิว"
+                else     -> "ต่างจากผิว"  to "สีคิ้วอาจเข้มหรืออ่อนเกินไป"
             }
-            else -> if (d <= 10) "ค่อนข้างใกล้" to "สีใกล้โทนผิว"
-            else          "ต่างปานกลาง"  to "เหมาะใช้สร้างเลเยอร์/ไฮไลต์"
+            else -> when {
+                d <= 10 -> "ใกล้เคียง" to "สีใกล้โทนผิว ดูกลมกลืนดี"
+                else    -> "ดูตัดกันสวย" to "สีต่างจากผิวเล็กน้อย ดูเด่นขึ้น"
+            }
         }
     }
 }

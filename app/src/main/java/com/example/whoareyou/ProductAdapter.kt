@@ -51,6 +51,7 @@ class ProductAdapter : ListAdapter<ProductItem, ProductAdapter.VH>(DIFF) {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+
         val v = LayoutInflater.from(parent.context)
             .inflate(R.layout.list_item_product, parent, false)
         return VH(v)
@@ -109,45 +110,58 @@ class ProductAdapter : ListAdapter<ProductItem, ProductAdapter.VH>(DIFF) {
 
     // ---------- Helpers ----------
 
-    private fun mapSuitability(
-        productType: String?,
-        deltaE00: Double?
-    ): Pair<String, String> {
-        if (deltaE00 == null) return "ไม่พบข้อมูลสี" to "สินค้านี้ยังไม่มีค่าสีสำหรับประเมิน"
+    private fun mapSuitability(productType: String?, deltaE00: Double?): Pair<String, String> {
+        if (deltaE00 == null)
+            return "ยังไม่มีข้อมูลสี" to "สินค้านี้ยังไม่มีข้อมูลเพียงพอสำหรับเทียบสีผิว"
+
         val d = deltaE00
         val t = (productType ?: "").lowercase()
 
-        val isComplexion = listOf("foundation","concealer","bb","cc","tinted","powder","cushion","contour","bronzer","base").any { t.contains(it) }
-        val isLipOrBlush = listOf("lip","lipstick","gloss","oil","tint","stain","kit","liner","blush","cheek").any { t.contains(it) }
-        val isEye        = listOf("eyeshadow","eye shadow","eyeliner","mascara").any { t.contains(it) }
-        val isBrow       = listOf("brow","eyebrow").any { t.contains(it) }
-
+        val isComplexion = listOf("foundation","concealer","bb","cc","tinted","powder","cushion","contour","bronzer","base")
+            .any { t.contains(it) }
+        val isLipOrBlush = listOf("lip","lipstick","gloss","oil","tint","stain","kit","liner","blush","cheek")
+            .any { t.contains(it) }
+        val isEye = listOf("eyeshadow","eye shadow","eyeliner","mascara")
+            .any { t.contains(it) }
+        val isBrow = listOf("brow","eyebrow")
+            .any { t.contains(it) }
 
         return when {
+            // 🎨 รองพื้น / คอนซีลเลอร์ / เบส
             isComplexion -> when {
-                d <= 2  -> "เหมาะมาก"   to "สีผิวแทบตรงกัน"
-                d <= 4  -> "ใกล้เคียง"  to "เฉดใกล้ผิว แนะนำลองที่แนวกราม"
-                d <= 6  -> "พอใช้"     to "อาจต้องบาลานซ์ด้วยไฮไลต์/คอนซีลเลอร์"
-                else    -> "ต่างจากผิว" to "มีโอกาสเพี้ยนเมื่อทาทั่วหน้า"
+                d <= 2  -> "ตรงกับผิวมาก" to "สีนี้ใกล้เคียงผิวจริงมาก ทาแล้วดูกลืนกับหน้า"
+                d <= 4  -> "ใกล้สีผิว"    to "เฉดใกล้ผิว แนะนำลองทาบริเวณกรามเพื่อเช็กความพอดี"
+                d <= 6  -> "พอใช้ได้"     to "สีอาจอ่อนหรือเข้มกว่าผิวเล็กน้อย ปรับได้ด้วยแป้งหรือคอนซีลเลอร์"
+                else    -> "ไม่เข้ากับผิว" to "สีต่างจากผิวชัด อาจทำให้หน้าดูหมองหรือวอก"
             }
+
+            // 💄 ลิป / บลัชออน
             isLipOrBlush -> when {
-                d in 15.0..25.0 -> "คอนทราสต์สวย" to "ช่วยให้ใบหน้าดูมีชีวิตชีวา"
-                d in 25.0..40.0 -> "เด่นชัด"     to "สีจัดขึ้น เหมาะกับลุคชัด"
-                else            -> "โทนสุภาพ"    to "คอนทราสต์ไม่แรง ใช้ได้ทุกวัน"
+                d in 15.0..25.0 -> "เข้ากับผิว" to "ช่วยให้หน้าดูสดใส สุขภาพดี"
+                d in 25.0..40.0 -> "ดูโดดเด่น"  to "สีจัดขึ้น เหมาะกับลุคแต่งหน้าเต็ม"
+                else            -> "ดูสุภาพ"    to "สีอ่อนกำลังดี เหมาะกับลุคธรรมชาติ"
             }
+
+            // 👁️ อายแชโดว์ / อายไลเนอร์
             isEye -> when {
-                d in 20.0..45.0 -> "ดวงตาเด่น"   to "คอนทราสต์กำลังดี ช่วยขับตา"
-                d in 45.0..60.0 -> "ลุคจัดชัด"   to "โทนชัด เหมาะกับแต่งเต็ม"
-                else            -> "โทนอ่อน"     to "สุภาพ/ธรรมชาติ"
+                d in 20.0..45.0 -> "ขับดวงตา"   to "สีช่วยให้ตาดูเด่นขึ้นอย่างพอดี"
+                d in 45.0..60.0 -> "ดูจัดชัด"   to "สีเข้ม เหมาะกับลุคแต่งเต็มหรือออกงาน"
+                else            -> "ดูเบา ๆ"    to "สีอ่อน เหมาะกับลุคธรรมชาติทุกวัน"
             }
+
+            // 🪞 คิ้ว
             isBrow -> when {
-                d <= 5   -> "กลืนผิว"   to "โทนคิ้วใกล้ธรรมชาติ"
-                d <= 12  -> "ใกล้เคียง" to "อาจต้องปรับความเข้มเล็กน้อย"
-                d <= 20  -> "พอใช้"     to "ควรเบลนด์เพื่อให้เนียน"
-                else     -> "ต่างโทน"   to "อาจเข้มหรืออ่อนเกินไป"
+                d <= 5   -> "ธรรมชาติ"    to "สีคิ้วกลืนกับผิว ดูเป็นธรรมชาติ"
+                d <= 12  -> "ใกล้เคียง"  to "สีใกล้เคียงกับผิวและสีผม"
+                d <= 20  -> "พอใช้ได้"    to "อาจต้องเกลี่ยเพิ่มให้เนียนกับผิว"
+                else     -> "ต่างจากผิว"  to "สีคิ้วอาจเข้มหรืออ่อนเกินไป"
             }
-            else -> if (d <= 10) "ค่อนข้างใกล้" to "สีใกล้โทนผิว"
-            else          "ต่างปานกลาง"  to "เหมาะใช้สร้างเลเยอร์/ไฮไลต์"
+
+            // 🎨 อื่น ๆ
+            else -> when {
+                d <= 10 -> "ใกล้เคียง" to "สีใกล้โทนผิว ดูกลมกลืนดี"
+                else    -> "ดูตัดกันสวย" to "สีต่างจากผิวเล็กน้อย ดูเด่นขึ้น"
+            }
         }
     }
 }

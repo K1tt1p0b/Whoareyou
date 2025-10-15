@@ -8,6 +8,7 @@
     android:background="#FCE4EC"
     tools:context=".ProductDetailActivity">
 
+    <!-- Top bar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topBar"
         android:layout_width="0dp"
@@ -15,28 +16,31 @@
         android:background="#F8BBD0"
         app:title="รายละเอียดสินค้า"
         app:titleTextColor="@android:color/black"
-        app:navigationIcon="?attr/homeAsUpIndicator"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Loading -->
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progressBar"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/topBar"
-        app:layout_constraintBottom_toTopOf="@id/shopeeButton"
+        app:layout_constraintBottom_toTopOf="@id/backButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Content -->
     <ScrollView
         android:id="@+id/contentScroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingBottom="120dp"
         app:layout_constraintTop_toBottomOf="@id/topBar"
-        app:layout_constraintBottom_toTopOf="@id/shopeeButton"
+        app:layout_constraintBottom_toTopOf="@id/backButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -51,7 +55,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="20dp"
-                app:cardElevation="0dp"
+                app:cardUseCompatPadding="true"
+                app:cardElevation="4dp"
                 app:strokeColor="#F8BBD0"
                 app:strokeWidth="1dp">
 
@@ -62,13 +67,18 @@
                     android:padding="20dp"
                     android:gravity="center_horizontal">
 
+                    <!-- Image -->
                     <ImageView
                         android:id="@+id/productImageView"
-                        android:layout_width="200dp"
-                        android:layout_height="200dp"
-                        android:scaleType="centerCrop"
-                        tools:srcCompat="@tools:sample/avatars" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxWidth="260dp"
+                        android:maxHeight="260dp"
+                        android:adjustViewBounds="true"
+                        android:scaleType="fitCenter"
+                        tools:src="@tools:sample/avatars" />
 
+                    <!-- Price -->
                     <TextView
                         android:id="@+id/productPriceTextView"
                         android:layout_width="wrap_content"
@@ -77,8 +87,9 @@
                         android:textColor="#E53935"
                         android:textSize="24sp"
                         android:textStyle="bold"
-                        tools:text="150 บาท" />
+                        tools:text="299 บาท" />
 
+                    <!-- Title -->
                     <TextView
                         android:id="@+id/productTitleTextView"
                         android:layout_width="match_parent"
@@ -88,76 +99,176 @@
                         android:textColor="@android:color/black"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        tools:text="ชื่อสินค้า" />
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        tools:text="Anastasia Beverly Hills Soft Matte Lip Cream" />
 
+                    <!-- Chips: type & shade -->
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipGroupMeta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        app:chipSpacingHorizontal="8dp"
+                        app:singleLine="true">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipType"
+                            style="@style/Widget.MaterialComponents.Chip.Action"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?attr/textAppearanceBody2"
+                            android:textColor="@android:color/black"
+                            android:clickable="false"
+                            android:checkable="false"
+                            app:chipBackgroundColor="@color/white"
+                            app:chipStrokeColor="#F8BBD0"
+                            app:chipStrokeWidth="1dp"
+                            app:chipIconVisible="false"
+                            tools:text="ประเภท: Liquid Lipstick" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipShade"
+                            style="@style/Widget.MaterialComponents.Chip.Action"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?attr/textAppearanceBody2"
+                            android:textColor="@android:color/black"
+                            android:clickable="false"
+                            android:checkable="false"
+                            app:chipBackgroundColor="@color/white"
+                            app:chipStrokeColor="#F8BBD0"
+                            app:chipStrokeWidth="1dp"
+                            app:chipIconVisible="false"
+                            tools:text="เฉด: Stockholm" />
+                    </com.google.android.material.chip.ChipGroup>
+
+                    <!-- Fallback meta -->
                     <TextView
                         android:id="@+id/productMetaTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="6dp"
                         android:textColor="@android:color/darker_gray"
                         android:textSize="13sp"
-                        tools:text="ประเภท: Foundation • เฉด: 03N" />
+                        android:visibility="gone"
+                        tools:text="ประเภท: Liquid Lipstick • เฉด: Stockholm" />
+
+                    <!-- Divider -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="14dp"
+                        android:background="#1FFFFFFF" />
+
+                    <!-- หัวข้อ: รายละเอียด -->
+                    <TextView
+                        android:id="@+id/labelDescription"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="รายละเอียด"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black"
+                        android:textSize="15sp"
+                        android:gravity="center" />
 
                     <TextView
                         android:id="@+id/productDescriptionTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="8dp"
                         android:gravity="center"
                         android:textColor="@android:color/darker_gray"
                         android:textSize="14sp"
-                        tools:text="รายละเอียดสินค้า" />
+                        android:lineSpacingExtra="2dp"
+                        tools:text="รายละเอียดสินค้าจะอยู่ตรงนี้" />
 
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="14dp"
+                        android:background="#1FFFFFFF" />
+
+                    <!-- หัวข้อ: ความเหมาะสมกับผิว -->
+                    <TextView
+                        android:id="@+id/labelSuitability"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:text="ความเหมาะสมกับผิว"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black"
+                        android:textSize="15sp"
+                        android:gravity="center" />
+
+                    <!-- สรุประดับความเหมาะสม/ความมั่นใจ -->
                     <TextView
                         android:id="@+id/productRatingTextView"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="8dp"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        tools:text="ระดับความเหมาะสม: เข้ากับผิว • ความมั่นใจ ~ 74% (มั่นใจปานกลาง)" />
+
+                    <!-- เหตุผล/คำแนะนำ -->
+                    <TextView
+                        android:id="@+id/productSuitReasonTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
                         android:textColor="@android:color/darker_gray"
                         android:textSize="13sp"
-                        tools:text="-" />
+                        android:gravity="center"
+                        tools:text="• สีจัดขึ้น เหมาะกับลุคแต่งหน้าเต็ม" />
+
+                    <!-- Spacer เล็ก ๆ เผื่อระยะ -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="16dp" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="80dp" />
         </LinearLayout>
     </ScrollView>
 
+    <!-- CTA: ไปหน้าสินค้า -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/shopeeButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="48dp"
-        android:layout_marginEnd="48dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
         android:layout_marginBottom="12dp"
         android:text="ไปหน้าสินค้า"
         android:textAllCaps="false"
         android:textColor="@color/black"
         app:backgroundTint="#FFFBEA"
-        app:cornerRadius="50dp"
+        app:cornerRadius="24dp"
         app:strokeColor="@color/black"
-        app:strokeWidth="1.5dp"
-        app:layout_constraintBottom_toTopOf="@id/lazadaButton"
+        app:strokeWidth="1dp"
+        app:layout_constraintBottom_toTopOf="@id/backButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- CTA: ย้อนกลับ -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/lazadaButton"
+        android:id="@+id/backButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="48dp"
-        android:layout_marginEnd="48dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
         android:layout_marginBottom="24dp"
-        android:text="ลิงก์สำรอง"
+        android:text="ย้อนกลับ"
         android:textAllCaps="false"
         android:textColor="@color/black"
         app:backgroundTint="#FFFBEA"
-        app:cornerRadius="50dp"
+        app:cornerRadius="24dp"
         app:strokeColor="@color/black"
-        app:strokeWidth="1.5dp"
+        app:strokeWidth="1dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

@@ -96,6 +96,8 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0") // เวอร์ชันใหม่กว่า
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
+
+    implementation("com.google.android.material:material:1.12.0")
     
     // *** Coil Dependency: เวอร์ชัน 2.6.0 โอเค แต่มี 2.7.0 ที่ใหม่กว่า (ณ ตอนนี้) ***
     implementation("io.coil-kt:coil:2.6.0") // สามารถอัปเดตเป็น 2.7.0 ได้ถ้าต้องการ
