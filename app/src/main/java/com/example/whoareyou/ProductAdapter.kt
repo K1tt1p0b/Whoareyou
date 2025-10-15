@@ -79,18 +79,24 @@ class ProductAdapter : ListAdapter<ProductItem, ProductAdapter.VH>(DIFF) {
             }
         } ?: ""
 
-        it.deltaE00?.let { d ->
-            h.tvDelta.visibility = View.VISIBLE
-            val dText = if (d.isNaN()) "—" else String.format(Locale.US, "%.1f", d)
-            h.tvDelta.text = "ΔE00: $dText"
-        } ?: run { h.tvDelta.visibility = View.GONE }
+        // ✅ แปลงค่า ΔE00 ให้เป็นหมวดที่เข้าใจง่าย + คำอธิบาย
+        val (suitLabel, suitDesc) = mapSuitability(it.type, it.deltaE00)
 
-        val reasons = it.reasons?.takeIf { r -> r.isNotEmpty() }?.joinToString("\n") { r -> "• $r" }
-        if (!reasons.isNullOrBlank()) {
+        h.tvDelta.visibility = View.VISIBLE
+        h.tvDelta.text = suitLabel              // เช่น “เหมาะมาก”, “คอนทราสต์สวย”, “โทนสุภาพ”
+
+        if (suitDesc.isNotBlank()) {
             h.tvReasons.visibility = View.VISIBLE
-            h.tvReasons.text = reasons
+            h.tvReasons.text = "• $suitDesc"
         } else {
-            h.tvReasons.visibility = View.GONE
+            // ถ้าอยากรวมเหตุผลจาก backend เพิ่มเติมด้วยก็เติมต่อได้
+            val reasons = it.reasons?.takeIf { r -> r.isNotEmpty() }?.joinToString("\n") { r -> "• $r" }
+            if (!reasons.isNullOrBlank()) {
+                h.tvReasons.visibility = View.VISIBLE
+                h.tvReasons.text = reasons
+            } else {
+                h.tvReasons.visibility = View.GONE
+            }
         }
 
         val img = ApiConfig.fullUrl(it.imageURL)
@@ -99,5 +105,50 @@ class ProductAdapter : ListAdapter<ProductItem, ProductAdapter.VH>(DIFF) {
             .placeholder(R.drawable.logo)
             .error(R.drawable.logo)
             .into(h.iv)
+    }
+
+    // ---------- Helpers ----------
+
+    private fun mapSuitability(
+        productType: String?,
+        deltaE00: Double?
+    ): Pair<String, String> {
+        if (deltaE00 == null) return "ไม่พบข้อมูลสี" to "สินค้านี้ยังไม่มีค่าสีสำหรับประเมิน"
+        val d = deltaE00
+        val t = (productType ?: "").lowercase()
+
+        val isComplexion = listOf("foundation","concealer","bb","cc","tinted","powder","cushion","contour","bronzer","base").any { t.contains(it) }
+        val isLipOrBlush = listOf("lip","lipstick","gloss","oil","tint","stain","kit","liner","blush","cheek").any { t.contains(it) }
+        val isEye        = listOf("eyeshadow","eye shadow","eyeliner","mascara").any { t.contains(it) }
+        val isBrow       = listOf("brow","eyebrow").any { t.contains(it) }
+
+        fun approx(v: Double) = "ΔE≈${"%.0f".format(v)}"
+
+        return when {
+            isComplexion -> when {
+                d <= 2  -> "เหมาะมาก"   to "สีผิวแทบตรงกัน (${approx(d)})"
+                d <= 4  -> "ใกล้เคียง"  to "เฉดใกล้ผิว แนะนำลองที่แนวกราม (${approx(d)})"
+                d <= 6  -> "พอใช้"     to "อาจต้องบาลานซ์ด้วยไฮไลต์/คอนซีลเลอร์ (${approx(d)})"
+                else    -> "ต่างจากผิว" to "มีโอกาสเพี้ยนเมื่อทาทั่วหน้า (${approx(d)})"
+            }
+            isLipOrBlush -> when {
+                d in 15.0..25.0 -> "คอนทราสต์สวย" to "ช่วยให้ใบหน้าดูมีชีวิตชีวา (${approx(d)})"
+                d in 25.0..40.0 -> "เด่นชัด"     to "สีจัดขึ้น เหมาะกับลุคชัด (${approx(d)})"
+                else            -> "โทนสุภาพ"    to "คอนทราสต์ไม่แรง ใช้ได้ทุกวัน (${approx(d)})"
+            }
+            isEye -> when {
+                d in 20.0..45.0 -> "ดวงตาเด่น"   to "คอนทราสต์กำลังดี ช่วยขับตา (${approx(d)})"
+                d in 45.0..60.0 -> "ลุคจัดชัด"   to "โทนชัด เหมาะกับแต่งเต็ม (${approx(d)})"
+                else            -> "โทนอ่อน"     to "สุภาพ/ธรรมชาติ (${approx(d)})"
+            }
+            isBrow -> when {
+                d <= 5   -> "กลืนผิว"   to "โทนคิ้วใกล้ธรรมชาติ (${approx(d)})"
+                d <= 12  -> "ใกล้เคียง" to "อาจต้องปรับความเข้มเล็กน้อย (${approx(d)})"
+                d <= 20  -> "พอใช้"     to "ควรเบลนด์เพื่อให้เนียน (${approx(d)})"
+                else     -> "ต่างโทน"   to "อาจเข้มหรืออ่อนเกินไป (${approx(d)})"
+            }
+            else -> if (d <= 10) "ค่อนข้างใกล้" to "สีใกล้โทนผิว (${approx(d)})"
+            else          "ต่างปานกลาง"  to "เหมาะใช้สร้างเลเยอร์/ไฮไลต์ (${approx(d)})"
+        }
     }
 }

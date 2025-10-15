@@ -199,6 +199,7 @@ class PrizeActivity : AppCompatActivity() {
     /** ---------------- palette by brightness (API แบบเดิม) ---------------- */
     private fun fetchColorPaletteByBrightness(brightness: String) {
         val url = Uri.parse("$BASE_URL/ai/cosmetics/recommendations").buildUpon()
+            // ไม่จำเป็นต้องส่ง skinTone แล้ว แต่ส่งได้ ไม่เป็นไร
             .appendQueryParameter("skinTone", brightness)
             .build().toString()
 
@@ -224,12 +225,20 @@ class PrizeActivity : AppCompatActivity() {
                         val json = JSONObject(bodyStr)
                         val arr = json.optJSONArray("recommendedColorPalettes")
                         if (arr != null && arr.length() > 0) {
-                            // ✅ ที่ถูกต้องต้องใช้ index 0
                             val first = arr.getJSONObject(0)
-                            val filename = first.getString("ImageURL")
-                            val fullUrl = "$BASE_URL/palettes/${Uri.encode(filename)}"
+
+                            // ใช้ URL ตามที่แบ็กเอนด์ส่งมา
+                            val imageUrl = first.getString("ImageURL")
+
+                            // สร้าง full URL ให้ถูกทุกกรณี
+                            val fullUrl = when {
+                                imageUrl.startsWith("http", true) -> imageUrl
+                                imageUrl.startsWith("/") -> BASE_URL + imageUrl
+                                else -> "$BASE_URL/palettes/$imageUrl"
+                            }
+
                             Glide.with(this@PrizeActivity)
-                                .load(fullUrl)                    // รองรับ .jpg/.png
+                                .load(fullUrl) // อย่า encode ทั้ง path เด็ดขาด
                                 .placeholder(R.drawable.logo)
                                 .error(R.drawable.error_image)
                                 .into(recommendedColorImageView)

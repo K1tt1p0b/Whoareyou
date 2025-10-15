@@ -278,20 +278,26 @@ class ProductActivity : AppCompatActivity() {
 
                 out.add(
                     ProductItem(
-                        id         = if (o.has("CosmeticID")) o.optInt("CosmeticID") else null,
-                        brandName  = o.optString("brandName", o.optString("brand", "")),
-                        productName= o.optString("Name", o.optString("name","")),
-                        category   = o.optString("Type", null),
-                        shadeName  = o.optString("Shade", null),
-                        shadeCode  = null,
-                        priceTHB   = if (priceRaw.isNaN()) null else priceRaw,
-                        imageURL   = o.optString("ImageURL", null),
-                        productURL = o.optString("ProductLink", null),
+                        id            = if (o.has("CosmeticID")) o.optInt("CosmeticID") else null,
+                        brandName     = o.optString("brandName", o.optString("brand", "")),
+                        productName   = o.optString("Name",  o.optString("name", "")),
+
+                        // ✅ เดิมเขียน category = o.optString("Type") ให้แก้เป็น:
+                        type          = o.optString("Type", null),
+
+                        // ใช้ Shade เดียวก็พอ
+                        shadeName     = o.optString("Shade", null),
+
+                        priceTHB      = priceRaw.takeIf { !it.isNaN() },
+                        imageURL      = o.optString("ImageURL", null),
+                        productURL    = o.optString("ProductLink", null),
+
                         hybridConfidence = if (o.has("hybrid_confidence")) o.optInt("hybrid_confidence") else null,
                         confidenceLevel  = o.optString("confidence_level", null),
-                        deltaE00         = if (o.has("deltaE00")) o.optDouble("deltaE00", Double.NaN).takeIf { !it.isNaN() } else null,
-                        badges = badges,
-                        reasons = reasons
+                        deltaE00         = o.optDouble("deltaE00", Double.NaN).takeIf { !it.isNaN() },
+
+                        badges        = badges,
+                        reasons       = reasons
                     )
                 )
             }

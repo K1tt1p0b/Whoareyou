@@ -1,16 +1,16 @@
 package com.kittipob.whoareyou.ui
 
-import com.google.gson.annotations.SerializedName
-
 data class ProductItem(
     val id: Int? = null,
     val brandName: String? = null,
     val productName: String? = null,
-    val category: String? = null,
-    val shadeName: String? = null,
-    val shadeCode: String? = null,
 
-    // ราคา/รูป/ลิงก์ (ไม่มี best* แล้ว)
+    // ✅ ใช้ field นี้แทน category
+    val type: String? = null,
+
+    val shadeName: String? = null,
+
+    // ราคา/รูป/ลิงก์
     val priceTHB: Double? = null,
     val imageURL: String? = null,
     val productURL: String? = null,

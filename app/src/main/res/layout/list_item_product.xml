@@ -76,20 +76,23 @@
                 android:textColor="@android:color/darker_gray"
                 android:layout_marginTop="2dp"/>
 
+            <!-- ✅ หัวข้อ “ระดับความเหมาะสม” (แทนการโชว์เลขอย่างเดียว) -->
             <TextView
                 android:id="@+id/tvDelta"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ΔE00: —"
+                android:text="ระดับความเหมาะสม"
+                android:textStyle="bold"
                 android:textSize="12sp"
                 android:textColor="@android:color/darker_gray"
-                android:layout_marginTop="4dp"/>
+                android:layout_marginTop="6dp"/>
 
+            <!-- ✅ คำอธิบายสั้น ๆ จาก ΔE00 -->
             <TextView
                 android:id="@+id/tvReasons"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="2dp"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="12sp"
                 android:text="• เหตุผลที่เราแนะนำจะขึ้นตรงนี้"/>
