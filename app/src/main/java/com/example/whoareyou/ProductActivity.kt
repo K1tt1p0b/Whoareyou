@@ -82,6 +82,13 @@ class ProductActivity : AppCompatActivity() {
             val intent = Intent(this, ProductDetailActivity::class.java).apply {
                 putExtra("PRODUCT_ID", item.id ?: -1)
                 putExtra("FALLBACK_URL", item.productURL)
+
+                // ✅ ส่งข้อมูลสำหรับแสดงความเหมาะสมแบบเข้าใจง่าย
+                putExtra("EXTRA_TYPE", item.type)
+                putExtra("EXTRA_DELTAE00", item.deltaE00 ?: Double.NaN)
+                putExtra("EXTRA_CONF", item.hybridConfidence ?: -1)
+                putExtra("EXTRA_CONF_LEVEL", item.confidenceLevel)
+                putExtra("EXTRA_REASON", item.reasons?.firstOrNull())
             }
             startActivity(intent)
         }

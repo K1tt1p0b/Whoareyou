@@ -18,6 +18,9 @@ import java.io.IOException
 import java.text.NumberFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.math.roundToInt
+import com.kittipob.whoareyou.net.ApiConfig
+
 
 class ProductDetailActivity : AppCompatActivity() {
 
@@ -69,7 +72,7 @@ class ProductDetailActivity : AppCompatActivity() {
         tvTitle    = findViewById(R.id.productTitleTextView)
         tvMeta     = findViewById(R.id.productMetaTextView)
         tvDesc     = findViewById(R.id.productDescriptionTextView)
-        tvRating   = findViewById(R.id.productRatingTextView)
+        tvRating   = findViewById(R.id.productRatingTextView) // ใช้แสดง “ระดับความเหมาะสม”
         btnShopee  = findViewById(R.id.shopeeButton)
         btnLazada  = findViewById(R.id.lazadaButton)
 
@@ -131,21 +134,35 @@ class ProductDetailActivity : AppCompatActivity() {
 
                         val brand = item.optString("brandName")
                         val name  = item.optString("Name")
-                        val type  = item.optString("Type", "")
+                        val typeFromApi  = item.optString("Type", "")
                         val shade = item.optString("Shade", "")
                         val price = item.optDouble("Price", Double.NaN)
                         val img   = item.optString("ImageURL", null)
+                        val imgUrl = ApiConfig.fullUrl(img)
                         val prodLink = item.optString("ProductLink", null)
-                        val desc  = item.optString("Description",
-                            listOfNotNull(type.ifBlank { null }, shade.ifBlank { null }).joinToString(" • ")
+                        val descApi  = item.optString(
+                            "Description",
+                            listOfNotNull(typeFromApi.ifBlank { null }, shade.ifBlank { null }).joinToString(" • ")
                         )
+
+                        // ---------- เติม “ระดับความเหมาะสม” จาก extras (ที่ส่งมาจากลิสต์) ----------
+                        val typeExtra   = intent.getStringExtra("EXTRA_TYPE")
+                        val deltaExtra  = intent.getDoubleExtra("EXTRA_DELTAE00", Double.NaN)
+                        val confExtra   = intent.getIntExtra("EXTRA_CONF", -1)
+                        val levelExtra  = intent.getStringExtra("EXTRA_CONF_LEVEL")
+                        val reasonExtra = intent.getStringExtra("EXTRA_REASON")
+
+                        val typeForSuit = (typeExtra ?: typeFromApi)
+                        val suitability = if (!deltaExtra.isNaN())
+                            mapSuitability(typeForSuit, deltaExtra)
+                        else null
 
                         // Title
                         tvTitle.text = if (brand.isNotBlank()) "$brand\n$name" else name
 
                         // Meta
                         tvMeta.text = buildString {
-                            if (type.isNotBlank()) append("ประเภท: $type")
+                            if (typeFromApi.isNotBlank()) append("ประเภท: $typeFromApi")
                             if (shade.isNotBlank()) {
                                 if (isNotEmpty()) append(" • ")
                                 append("เฉด: $shade")
@@ -157,24 +174,46 @@ class ProductDetailActivity : AppCompatActivity() {
                             NumberFormat.getNumberInstance(Locale("th","TH")).format(price) + " บาท"
                         else "-"
 
-                        tvDesc.text = desc.ifBlank { "-" }
-                        tvRating.text = "-" // ไม่มีเรตติ้งจากแบ็กเอนด์แล้ว
+                        // Description
+                        tvDesc.text = buildString {
+                            append(descApi.ifBlank { "-" })
+                            // ต่อท้ายเหตุผลถ้ามี
+                            val extraReason = suitability?.second?.takeIf { it.isNotBlank() } ?: reasonExtra
+                            if (!extraReason.isNullOrBlank()) {
+                                append("\n• "); append(extraReason)
+                            }
+                        }
+
+                        // แทนค่า “rating” เดิมด้วย “ระดับความเหมาะสม”
+                        tvRating.text = buildString {
+                            append("ระดับความเหมาะสม: ")
+                            if (suitability != null) {
+                                append(suitability.first)               // เช่น เหมาะมาก / คอนทราสต์สวย
+                            } else {
+                                append("-")
+                            }
+                            // โชว์ความมั่นใจรวมจากลิสต์ ถ้ามี
+                            if (confExtra >= 0 && !levelExtra.isNullOrBlank()) {
+                                append("  •  ")
+                                append("ความมั่นใจ ~ ${confExtra.coerceIn(0,100)}% ($levelExtra)")
+                            }
+                        }
 
                         Glide.with(this@ProductDetailActivity)
-                            .load(img ?: R.drawable.logo)
+                            .load(ApiConfig.fullUrl(img) ?: R.drawable.logo)  // ใช้ fullUrl ตรงนี้!
                             .placeholder(R.drawable.logo)
                             .error(R.drawable.logo)
                             .into(ivProduct)
 
-                        // ใช้ลิงก์ ProductLink เป็นหลัก
+                        // ลิงก์ร้าน
                         if (!prodLink.isNullOrBlank()) {
                             btnShopee.visibility = View.VISIBLE
                             btnLazada.visibility = View.VISIBLE
                             fallbackUrl = prodLink
                         } else {
-                            // หากไม่มีลิงก์เลย ซ่อนปุ่ม
-                            btnShopee.visibility = if (fallbackUrl.isNullOrBlank()) View.GONE else View.VISIBLE
-                            btnLazada.visibility = if (fallbackUrl.isNullOrBlank()) View.GONE else View.VISIBLE
+                            val show = !fallbackUrl.isNullOrBlank()
+                            btnShopee.visibility = if (show) View.VISIBLE else View.GONE
+                            btnLazada.visibility = if (show) View.VISIBLE else View.GONE
                         }
 
                     } catch (e: Exception) {
@@ -183,5 +222,46 @@ class ProductDetailActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    // ---------- แปลง ΔE00 เป็นคำอธิบายเข้าใจง่าย ----------
+    private fun mapSuitability(productType: String?, deltaE00: Double?): Pair<String, String> {
+        if (deltaE00 == null) return "ไม่พบข้อมูลสี" to "สินค้ายังไม่มีค่าสีสำหรับประเมิน"
+        val d = deltaE00
+        val t = (productType ?: "").lowercase()
+
+        val isComplexion = listOf("foundation","concealer","bb","cc","tinted","powder","cushion","contour","bronzer","base").any { t.contains(it) }
+        val isLipOrBlush = listOf("lip","lipstick","gloss","oil","tint","stain","kit","liner","blush","cheek").any { t.contains(it) }
+        val isEye        = listOf("eyeshadow","eye shadow","eyeliner","mascara").any { t.contains(it) }
+        val isBrow       = listOf("brow","eyebrow").any { t.contains(it) }
+
+
+
+        return when {
+            isComplexion -> when {
+                d <= 2  -> "เหมาะมาก"   to "สีผิวแทบตรงกัน"
+                d <= 4  -> "ใกล้เคียง"  to "เฉดใกล้ผิว แนะนำลองที่แนวกราม"
+                d <= 6  -> "พอใช้"     to "อาจต้องบาลานซ์ด้วยไฮไลต์/คอนซีลเลอร์"
+                else    -> "ต่างจากผิว" to "มีโอกาสเพี้ยนเมื่อทาทั่วหน้า"
+            }
+            isLipOrBlush -> when {
+                d in 15.0..25.0 -> "คอนทราสต์สวย" to "ช่วยให้ใบหน้าดูมีชีวิตชีวา"
+                d in 25.0..40.0 -> "เด่นชัด"     to "สีจัดขึ้น เหมาะกับลุคชัด"
+                else            -> "โทนสุภาพ"    to "คอนทราสต์ไม่แรง ใช้ได้ทุกวัน"
+            }
+            isEye -> when {
+                d in 20.0..45.0 -> "ดวงตาเด่น"   to "คอนทราสต์กำลังดี ช่วยขับตา"
+                d in 45.0..60.0 -> "ลุคจัดชัด"   to "โทนชัด เหมาะกับแต่งเต็ม"
+                else            -> "โทนอ่อน"     to "สุภาพ/ธรรมชาติ"
+            }
+            isBrow -> when {
+                d <= 5   -> "กลืนผิว"   to "โทนคิ้วใกล้ธรรมชาติ"
+                d <= 12  -> "ใกล้เคียง" to "อาจต้องปรับความเข้มเล็กน้อย"
+                d <= 20  -> "พอใช้"     to "ควรเบลนด์เพื่อให้เนียน"
+                else     -> "ต่างโทน"   to "อาจเข้มหรืออ่อนเกินไป"
+            }
+            else -> if (d <= 10) "ค่อนข้างใกล้" to "สีใกล้โทนผิว"
+            else          "ต่างปานกลาง"  to "เหมาะใช้สร้างเลเยอร์/ไฮไลต์"
+        }
     }
 }
